@@ -363,26 +363,9 @@
     <div class="card">
       <div class="card-header">
         <h2>👥 Authorities</h2>
-        <span id="next-threshold-label" style="font-size:12px;color:var(--muted);">threshold —</span>
+        <span id="next-threshold-label" style="font-size:12px;color:var(--muted);">Effective quorum: —</span>
       </div>
       <div class="card-body" id="auth-list" style="padding:14px 18px;"></div>
-    </div>
-
-    <!-- Election parameters (threshold + Shamir) -->
-    <div class="card" id="params-card">
-      <div class="card-header">
-        <h2>⚙️ Key Parameters</h2>
-      </div>
-      <div class="card-body">
-        <div class="info-row">
-          <span class="label">Weight threshold</span>
-          <span class="val" id="param-threshold" style="color:var(--accent)">—</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Min shares (Shamir)</span>
-          <span class="val" id="param-shamir" style="color:var(--purple)">—</span>
-        </div>
-      </div>
     </div>
 
     <!-- Blockchain -->
@@ -403,9 +386,10 @@
 
 <script>
 // ── State ──────────────────────────────────────────────────────────
-const SHAMIR_N = 6;
-let lastStatus    = null;
-let lastVoteCount = 0;
+let lastStatus       = null;
+let lastVoteCount    = 0;
+let registryCache    = {};   // name → {reputation, weight}
+let lastIdleThreshold = null;
 
 // ── Toast ──────────────────────────────────────────────────────────
 function toast(msg, color) {
@@ -431,8 +415,12 @@ async function poll() {
       state.round > 0 ? `Round ${state.round}` : 'No election yet';
     document.getElementById('status-text').textContent = 'running';
 
-    renderAuthorities(auths, state.threshold);
-    updateParamsCard(state);
+    if (state.status === 'idle') {
+      lastIdleThreshold = state.threshold;
+      liveRenderIdleAuthorities();
+    } else {
+      renderAuthorities(auths, state.threshold);
+    }
 
     if (state.status !== lastStatus) {
       lastStatus = state.status;
@@ -454,7 +442,7 @@ setTimeout(loadChain, 500);
 function renderPhase(state) {
   const panel = document.getElementById('phase-panel');
   switch(state.status) {
-    case 'idle':           panel.innerHTML = htmlIdle(state);           break;
+    case 'idle':           panel.innerHTML = htmlIdle(state); initIdleAuthorities(); break;
     case 'active':         panel.innerHTML = htmlActive(state);         break;
     case 'reconstruction': panel.innerHTML = htmlReconstruction(state); break;
     case 'failed':         panel.innerHTML = htmlFailed(state);         break;
@@ -504,11 +492,25 @@ function htmlIdle(state) {
         <button class="btn-add" onclick="addOption()">+ Add Option</button>
       </div>
 
+      <div class="form-group">
+        <div class="collapsible-header" onclick="toggleAuthorities()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;user-select:none;">
+          <span style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Authorities</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="auth-count-badge" style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-weight:600;"></span>
+            <span id="auth-chevron" style="color:var(--muted);font-size:12px;">▲</span>
+          </div>
+        </div>
+        <div id="auth-collapse" style="display:block;margin-top:8px;">
+          <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Known authorities load their reputation history automatically. New ones start neutral.</p>
+          <div id="auth-input-list"></div>
+          <button class="btn-add" onclick="addAuthorityInput()">+ Add Authority</button>
+        </div>
+      </div>
+
       <p class="notice">
-        Keys will be generated when you start. The private key is split into
-        ${SHAMIR_N} shares using a <strong>${state.shamir_t}-of-${SHAMIR_N}</strong>
-        Shamir scheme — derived from the current reputation state.
-        Reconstruction also requires combined reputation weight ≥&nbsp;<strong>${state.threshold}</strong>.
+        The private key will be split across all listed authorities using Shamir secret sharing.
+        The minimum shares required is derived automatically from the reputation-based weight threshold.
+        Reconstruction requires meeting both the share count and weight threshold.
       </p>
 
       <button class="btn btn-primary" onclick="createElection()" id="btn-create">
@@ -516,6 +518,88 @@ function htmlIdle(state) {
       </button>
     </div>
   </div>`;
+}
+
+function toggleAuthorities() {
+  const panel   = document.getElementById('auth-collapse');
+  const chevron = document.getElementById('auth-chevron');
+  if (!panel) return;
+  const open = panel.style.display === 'none';
+  panel.style.display  = open ? 'block' : 'none';
+  if (chevron) chevron.textContent = open ? '▲' : '▼';
+}
+
+function updateAuthBadge() {
+  const list  = document.getElementById('auth-input-list');
+  const badge = document.getElementById('auth-count-badge');
+  if (!list || !badge) return;
+
+  const inputs = Array.from(list.querySelectorAll('input[type=text]'));
+  const names  = inputs.map(i => i.value.trim()).filter(Boolean);
+
+  // Find duplicates
+  const seen = new Set(), dupes = new Set();
+  names.forEach(n => { seen.has(n) ? dupes.add(n) : seen.add(n); });
+
+  // Highlight each input
+  inputs.forEach(inp => {
+    const v = inp.value.trim();
+    if (!v)           inp.style.borderColor = 'var(--yellow)';
+    else if (dupes.has(v)) inp.style.borderColor = 'var(--red)';
+    else              inp.style.borderColor = '';
+  });
+
+  const hasDupes = dupes.size > 0;
+  badge.textContent  = hasDupes ? `${names.length} · ⚠ duplicate names` : `${names.length} authorities`;
+  badge.style.color  = hasDupes ? 'var(--red)' : 'var(--text)';
+}
+
+async function initIdleAuthorities() {
+  const list = document.getElementById('auth-input-list');
+  if (!list) return;
+  try {
+    const r   = await fetch('/registry');
+    const reg = await r.json();
+    registryCache = {};
+    reg.forEach(a => { registryCache[a.name] = a; });
+    if (reg.length > 0) {
+      reg.forEach(a => addAuthorityInput(a.name, a.reputation));
+    } else {
+      ['Alice','Bob','Carol','Dave','Eve','Frank'].forEach(n => addAuthorityInput(n));
+    }
+  } catch {
+    ['Alice','Bob','Carol','Dave','Eve','Frank'].forEach(n => addAuthorityInput(n));
+  }
+  updateAuthBadge();
+  liveRenderIdleAuthorities();
+}
+
+function addAuthorityInput(name = '', rep = null) {
+  const list = document.getElementById('auth-input-list');
+  if (!list) return;
+  const row  = document.createElement('div');
+  row.className = 'option-row';
+  const badge = rep !== null
+    ? `<span style="font-size:11px;padding:3px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--muted);white-space:nowrap;">rep ${rep.toFixed(2)}</span>`
+    : `<span style="font-size:11px;padding:3px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--yellow);white-space:nowrap;">new</span>`;
+  row.innerHTML = `
+    <input type="text" placeholder="Authority name" value="${name}" oninput="updateAuthBadge(); liveRenderIdleAuthorities();" />
+    ${badge}
+    <button class="btn-icon" onclick="removeAuthorityInput(this)">×</button>`;
+  list.appendChild(row);
+  updateAuthBadge();
+  liveRenderIdleAuthorities();
+}
+
+function removeAuthorityInput(btn) {
+  const list = document.getElementById('auth-input-list');
+  if (list && list.children.length > 3) {
+    btn.closest('.option-row').remove();
+    updateAuthBadge();
+    liveRenderIdleAuthorities();
+  } else {
+    toast('Need at least 3 authorities', 'var(--red)');
+  }
 }
 
 function addOption() {
@@ -534,13 +618,16 @@ function removeOption(btn) {
 }
 
 async function createElection() {
-  const title   = document.getElementById('inp-title').value.trim();
-  const voters  = parseInt(document.getElementById('inp-voters').value);
-  const options = Array.from(document.querySelectorAll('#options-list input')).map(i => i.value.trim()).filter(Boolean);
+  const title       = document.getElementById('inp-title').value.trim();
+  const voters      = parseInt(document.getElementById('inp-voters').value);
+  const options     = Array.from(document.querySelectorAll('#options-list input')).map(i => i.value.trim()).filter(Boolean);
+  const authorities = Array.from(document.querySelectorAll('#auth-input-list input[type=text]')).map(i => i.value.trim()).filter(Boolean);
 
-  if (!title)           return toast('Enter a title', 'var(--red)');
-  if (options.length<2) return toast('Need at least 2 options', 'var(--red)');
-  if (voters < 1)       return toast('Need at least 1 voter', 'var(--red)');
+  if (!title)                return toast('Enter a title', 'var(--red)');
+  if (options.length < 2)    return toast('Need at least 2 options', 'var(--red)');
+  if (voters < 1)            return toast('Need at least 1 voter', 'var(--red)');
+  if (authorities.length < 3)   return toast('Need at least 3 authorities', 'var(--red)');
+  if (new Set(authorities).size !== authorities.length) return toast('Duplicate authority names', 'var(--red)');
 
   const btn = document.getElementById('btn-create');
   btn.disabled = true;
@@ -550,7 +637,7 @@ async function createElection() {
     const r = await fetch('/election/create', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({title, options, num_voters: voters}),
+      body: JSON.stringify({title, options, num_voters: voters, authorities}),
     });
     const d = await r.json();
     if (d.status === 'ok') {
@@ -704,7 +791,7 @@ function htmlReconstruction(state) {
           <div class="meter-value shares" id="v-shares">${state.submitted_shares.length} / ${state.shamir_t}</div>
         </div>
         <div class="meter-box">
-          <div class="meter-label">Weight (need ≥ ${state.threshold})</div>
+          <div class="meter-label">Quorum (need ≥ ${state.threshold})</div>
           <div class="meter-track"><div class="meter-fill weight" id="m-weight" style="width:${weightPct}%"></div></div>
           <div class="meter-value weight" id="v-weight">${state.coalition_weight} / ${state.threshold}</div>
         </div>
@@ -712,9 +799,8 @@ function htmlReconstruction(state) {
 
       <p class="notice">
         Reconstruction requires <strong>at least ${state.shamir_t} shares</strong>
-        (Shamir threshold) <em>and</em> combined reputation weight
-        ≥&nbsp;<strong>${state.threshold}</strong> (adaptive threshold).
-        High-reputation authorities carry more weight.
+        <em>and</em> an effective quorum of ≥&nbsp;<strong>${state.threshold}</strong>
+        combined reputation weight. High-reputation authorities count for more.
       </p>
 
       <div class="auth-submit-grid" id="auth-submit-list">${authRows}</div>
@@ -954,7 +1040,7 @@ function htmlComplete(state) {
     const submitted = state.submitted_shares.includes(name);
     const cheated   = cheaters.includes(name);
     const w         = state.weights[name] || 0;
-    const avgNeeded = state.shamir_t > 0 ? state.threshold / state.shamir_t : 1;
+    const avgNeeded = (state.shamir_t > 0 && state.threshold > 0) ? state.threshold / state.shamir_t : 1;
 
     const P = submitted ? 1.0 : cheated ? 0.5 : 0.0;
     const C = submitted ? Math.min(1.0, +(w / avgNeeded).toFixed(2)) : 0.0;
@@ -1004,7 +1090,7 @@ function htmlComplete(state) {
     </div>
     <div class="card-body">
       <div class="info-row"><span class="label">Coalition</span><span class="val">${state.submitted_shares.join(', ')}</span></div>
-      <div class="info-row"><span class="label">Coalition weight</span><span class="val" style="color:var(--purple)">${state.coalition_weight} / ${state.threshold}</span></div>
+      <div class="info-row"><span class="label">Coalition quorum</span><span class="val" style="color:var(--purple)">${state.coalition_weight} / ${state.threshold}</span></div>
       <div style="margin-top:16px;">${bars}</div>
 
       <p class="rep-section-title">Authority Reputation Update</p>
@@ -1052,17 +1138,73 @@ async function updateReputations() {
 }
 
 // ── Right panel: key parameters card ──────────────────────────────
-function updateParamsCard(state) {
-  const t = document.getElementById('param-threshold');
-  const s = document.getElementById('param-shamir');
-  if (t) t.textContent = state.threshold !== undefined ? state.threshold : '—';
-  if (s) s.textContent = state.shamir_t  !== undefined ? `${state.shamir_t}-of-${SHAMIR_N}` : '—';
+
+// ── Threshold formula (mirrors Python backend) ─────────────────────
+function trustEvenness(reps) {
+  const avg = reps.reduce((a, b) => a + b, 0) / reps.length;
+  if (avg === 0) return 0;
+  const variance = reps.reduce((s, r) => s + (r - avg) ** 2, 0);
+  return Math.max(0, 1 - variance / (reps.length * avg ** 2));
 }
 
-// ── Right panel: authorities ───────────────────────────────────────
+function computeQuorum(reps) {
+  const n        = reps.length;
+  const avg      = reps.reduce((a, b) => a + b, 0) / n;
+  const E        = trustEvenness(reps);
+  const trust    = Math.min(1.0, avg * E);
+  const tNeutral = Math.ceil(n / 2);
+  const tMax     = n - 1;
+  const tMin     = Math.max(2, Math.ceil(n / 3));
+  let t;
+  if (trust <= 2 / 3) {
+    t = tMax - (tMax - tNeutral) * trust * 1.5;
+  } else {
+    t = tNeutral - (tNeutral - tMin) * (trust - 2 / 3) * 3;
+  }
+  return Math.round(Math.max(tMin, Math.min(tMax, t)) * 1000) / 1000;
+}
+
+// ── Right panel: authorities (idle — driven by form inputs) ───────
+function liveRenderIdleAuthorities() {
+  const list = document.getElementById('auth-input-list');
+  if (!list) return;
+  // unique, non-empty names only
+  const names = [...new Set(
+    Array.from(list.querySelectorAll('input[type=text]'))
+      .map(i => i.value.trim()).filter(Boolean)
+  )];
+  if (names.length === 0) return;
+
+  const INITIAL_REP = 2 / 3;
+  const reps   = names.map(n => registryCache[n] ? registryCache[n].reputation : INITIAL_REP);
+  const total  = reps.reduce((a, b) => a + b, 0);
+  const n      = names.length;
+  const auths  = names.map((name, i) => ({
+    name,
+    reputation: reps[i],
+    weight: total > 0 ? Math.round((reps[i] / total) * n * 1000) / 1000 : 1.0,
+  }));
+
+  const quorum = computeQuorum(reps);
+  const maxRep = Math.max(...reps, 0.001);
+  document.getElementById('next-threshold-label').textContent = `Effective quorum: ${quorum}`;
+  document.getElementById('auth-list').innerHTML = auths.map(a => `
+    <div class="auth-row">
+      <div class="auth-avatar-sm">${a.name[0].toUpperCase()}</div>
+      <div class="auth-info">
+        <div class="auth-name-sm">${a.name}</div>
+        <div class="rep-track-sm">
+          <div class="rep-fill-sm" style="width:${Math.round((a.reputation/maxRep)*100)}%"></div>
+        </div>
+      </div>
+      <div class="auth-weight-sm">${a.weight}×</div>
+    </div>`).join('');
+}
+
+// ── Right panel: authorities (active/reconstruction/complete) ─────
 function renderAuthorities(auths, threshold) {
   const maxRep = Math.max(...auths.map(a => a.reputation), 0.001);
-  document.getElementById('next-threshold-label').textContent = `threshold ${threshold}`;
+  document.getElementById('next-threshold-label').textContent = `Effective quorum: ${threshold}`;
   document.getElementById('auth-list').innerHTML = auths.map(a => `
     <div class="auth-row">
       <div class="auth-avatar-sm">${a.name[0]}</div>
