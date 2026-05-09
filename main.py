@@ -14,8 +14,6 @@ shamir = ShamirService()
 
 encryption = EncryptionService()
 
-pvss = PVSS()
-
 rep_engine = ReputationEngine()
 
 threshold_manager = ThresholdManager()
@@ -23,13 +21,24 @@ threshold_manager = ThresholdManager()
 blockchain = Blockchain()
 
 
-# Generate Encryption Keys
+# Generate ElGamal Keys first — PVSS needs the group parameters (p, g)
 
 private_key, public_key = (
     encryption.generate_keys()
 )
 
-print("\nRSA Keys Generated")
+print("\nElGamal Keys Generated")
+print(f"  p (prime):  {str(public_key['p'])[:40]}…")
+print(f"  g (gen):    {str(public_key['g'])[:40]}…")
+print(f"  y (pubkey): {str(public_key['y'])[:40]}…")
+
+
+# Init PVSS with ElGamal group so commitments are g^H(share) mod p
+
+pvss = PVSS(
+    p=public_key['p'],
+    g=public_key['g']
+)
 
 
 # Secret Sharing
@@ -48,16 +57,16 @@ for share in shares:
     print(share)
 
 
-# PVSS Commitments
+# PVSS Commitments  (discrete-log: C_i = g^{H(share_i)} mod p)
 
 commitments = pvss.batch_generate_commitments(
     shares
 )
 
-print("\nPVSS Commitments:\n")
+print("\nPVSS Commitments (g^H(share) mod p):\n")
 
 for commitment in commitments:
-    print(commitment)
+    print(str(commitment)[:60] + "…")
 
 
 # PVSS Verification
@@ -94,7 +103,7 @@ encrypted_vote = encryption.encrypt_vote(
     vote
 )
 
-print("\nEncrypted Vote:\n")
+print("\nEncrypted Vote (ElGamal C1, C2):\n")
 
 print(encrypted_vote)
 

@@ -2,60 +2,54 @@ import hashlib
 
 
 class PVSS:
+    """
+    Simplified PVSS using discrete-log commitments over the ElGamal group.
 
-    def generate_commitment(
-        self,
-        share
-    ):
+    Commitment: C_i = g^{H(share_i)} mod p
+    This ties each share commitment to the same group as the vote encryption,
+    consistent with Schoenmakers (1999).
+    """
 
-        commitment = hashlib.sha256(
-            share.encode()
-        ).hexdigest()
+    def __init__(self, p=None, g=None):
 
-        return commitment
+        self.p = p
+        self.g = g
 
-    def verify_share(
-        self,
-        share,
-        commitment
-    ):
+    def _hash_to_exponent(self, share):
 
-        computed = hashlib.sha256(
-            share.encode()
-        ).hexdigest()
+        h = int(hashlib.sha256(share.encode()).hexdigest(), 16)
 
-        return computed == commitment
+        if self.p:
+            # Reduce into valid exponent range [2, p-2]
+            return h % (self.p - 2) + 2
 
-    def batch_generate_commitments(
-        self,
-        shares
-    ):
+        return h
 
-        commitments = []
+    def generate_commitment(self, share):
 
-        for share in shares:
+        exponent = self._hash_to_exponent(share)
 
-            commitments.append(
-                self.generate_commitment(share)
-            )
+        if self.p and self.g:
+            # Discrete-log commitment: C_i = g^{H(share)} mod p
+            return pow(self.g, exponent, self.p)
 
-        return commitments
+        # Fallback if no group parameters provided
+        return exponent
 
-    def batch_verify(
-        self,
-        shares,
-        commitments
-    ):
+    def verify_share(self, share, commitment):
 
-        results = []
+        return self.generate_commitment(share) == commitment
 
-        for i in range(len(shares)):
+    def batch_generate_commitments(self, shares):
 
-            valid = self.verify_share(
-                shares[i],
-                commitments[i]
-            )
+        return [
+            self.generate_commitment(s)
+            for s in shares
+        ]
 
-            results.append(valid)
+    def batch_verify(self, shares, commitments):
 
-        return results
+        return [
+            self.verify_share(shares[i], commitments[i])
+            for i in range(len(shares))
+        ]

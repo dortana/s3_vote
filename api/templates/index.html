@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S³-Vote</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --border:   #21262d;
+      --accent:   #58a6ff;
+      --green:    #3fb950;
+      --red:      #f85149;
+      --yellow:   #d29922;
+      --purple:   #a371f7;
+      --text:     #e6edf3;
+      --muted:    #8b949e;
+      --radius:   10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg,#1f6feb,#388bfd);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    header h1 { font-size: 20px; font-weight: 700; }
+    header p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .round-pill {
+      background: #21262d; border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 12px;
+      font-size: 12px; font-weight: 600; color: var(--accent);
+    }
+    .status-pill {
+      display: flex; align-items: center; gap: 7px;
+      background: #122117; border: 1px solid #2ea04330;
+      border-radius: 20px; padding: 5px 12px;
+      font-size: 12px; color: var(--green);
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ── Layout ── */
+    .layout { display: grid; grid-template-columns: 1fr 380px; gap: 18px; align-items: start; }
+    @media(max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+    /* ── Card ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+    .card:last-child { margin-bottom: 0; }
+    .card-header {
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+    .card-body { padding: 18px; }
+
+    /* ── Phase badge ── */
+    .phase-badge {
+      font-size: 11px; font-weight: 700; padding: 3px 9px;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .phase-badge.active        { background:#122117; color:var(--green);  border:1px solid #2ea04340; }
+    .phase-badge.reconstruction{ background:#1a1236; color:var(--purple); border:1px solid #a371f740; }
+    .phase-badge.complete      { background:#1c1400; color:var(--yellow); border:1px solid #d2992240; }
+    .phase-badge.idle          { background:#21262d; color:var(--muted);  border:1px solid var(--border); }
+
+    /* ── Form ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .form-group input[type=text],
+    .form-group input[type=number] {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: 14px;
+      outline: none; transition: border-color .15s;
+    }
+    .form-group input:focus { border-color: var(--accent); }
+    .option-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .option-row input { flex: 1; }
+    .btn-icon {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; padding: 0 10px; cursor: pointer; font-size: 16px;
+      transition: color .15s, border-color .15s;
+    }
+    .btn-icon:hover { color: var(--red); border-color: var(--red); }
+    .btn-add {
+      background: none; border: 1px dashed var(--border); color: var(--muted);
+      border-radius: 7px; padding: 8px; cursor: pointer; font-size: 13px;
+      width: 100%; transition: color .15s, border-color .15s;
+    }
+    .btn-add:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Buttons ── */
+    .btn {
+      border: none; border-radius: 8px; padding: 11px 18px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: opacity .15s, transform .1s; width: 100%; margin-top: 6px;
+    }
+    .btn:hover  { opacity: .85; }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .35; cursor: not-allowed; }
+    .btn-primary   { background: #1f6feb; color: #fff; }
+    .btn-danger    { background: #5a1e1e; color: var(--red);    border: 1px solid #f8514930; }
+    .btn-secondary { background: #21262d; color: var(--muted); border: 1px solid var(--border); margin-top: 12px; }
+    .btn-submit       { background: #1a1236; color: var(--purple); border: 1px solid #a371f740; padding: 7px 14px; width: auto; margin-top: 0; font-size: 12px; }
+    .btn-submit:disabled { opacity: .35; }
+    .btn-submit-wrong { background: #2a0f0f; color: var(--red); border: 1px solid #f8514940; padding: 7px 14px; width: auto; margin-top: 0; font-size: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+    .btn-submit-wrong:hover { opacity: .8; }
+    .btn-submit-wrong:disabled { opacity: .35; cursor: not-allowed; }
+    .auth-submit-row.cheater  { border-color: #f8514950; background: #2a0f0f30; }
+    .auth-submit-row.skipped  { border-color: #d2992240; background: #1c140020; }
+    .cheater-mark { color: var(--red);    font-size: 13px; font-weight: 700; }
+    .skipped-mark { color: var(--yellow); font-size: 13px; font-weight: 700; }
+    .btn-submit-skip { background: #1c1400; color: var(--yellow); border: 1px solid #d2992240; padding: 7px 14px; width: auto; margin-top: 0; font-size: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+    .btn-submit-skip:hover { opacity: .8; }
+    .btn-submit-skip:disabled { opacity: .35; cursor: not-allowed; }
+
+    /* ── Threshold preview ── */
+    .threshold-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px; font-size: 13px;
+    }
+    .threshold-box .label { color: var(--muted); }
+    .threshold-box .val   { font-weight: 700; color: var(--accent); font-size: 16px; }
+
+    /* ── Voting options grid ── */
+    .option-grid { display: grid; gap: 10px; margin: 16px 0; }
+    .btn-option {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px; font-size: 15px; font-weight: 700;
+      color: var(--text); cursor: pointer; transition: border-color .15s, background .15s;
+      width: 100%; margin-top: 0;
+    }
+    .btn-option:hover { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+
+    /* ── Vote progress ── */
+    .progress-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .progress-track { background: var(--border); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 6px; }
+    .progress-fill  { height: 100%; background: linear-gradient(90deg,var(--green),var(--accent)); border-radius: 6px; transition: width .4s ease; }
+
+    /* ── Reconstruction ── */
+    .threshold-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+    .meter-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+    }
+    .meter-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .meter-track { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 6px; }
+    .meter-fill  { height: 100%; border-radius: 4px; transition: width .4s ease; }
+    .meter-fill.shares { background: var(--accent); }
+    .meter-fill.weight { background: var(--purple); }
+    .meter-value { font-size: 13px; font-weight: 700; }
+    .meter-value.shares { color: var(--accent); }
+    .meter-value.weight { color: var(--purple); }
+
+    .auth-submit-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .auth-submit-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px;
+      transition: border-color .2s;
+    }
+    .auth-submit-row.submitted { border-color: #a371f750; background: #1a123630; }
+    .auth-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg,#1f6feb,#58a6ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .auth-submit-info { flex: 1; min-width: 0; }
+    .auth-submit-name { font-size: 13px; font-weight: 600; }
+    .auth-submit-weight { font-size: 11px; color: var(--muted); }
+    .submitted-check { color: var(--purple); font-size: 13px; font-weight: 700; }
+
+    /* ── Tally chart ── */
+    .tally-chart { margin: 14px 0; }
+    .tally-row { margin-bottom: 12px; }
+    .tally-row-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+    .tally-option { font-weight: 600; }
+    .tally-count  { color: var(--muted); }
+    .tally-track  { background: var(--border); border-radius: 6px; height: 10px; overflow: hidden; }
+    .tally-fill   { height: 100%; border-radius: 6px; transition: width .6s ease; }
+
+    /* ── Reputation update ── */
+    .rep-section-title { font-size: 13px; font-weight: 600; margin: 20px 0 10px; color: var(--text); }
+    .rep-section-sub   { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+    .rep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    @media(max-width:600px){ .rep-grid{ grid-template-columns:1fr; } }
+    .rep-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+    }
+    .rep-card.participated { border-color: #a371f740; }
+    .rep-card-name { font-size: 13px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .participated-tag { font-size: 10px; background:#1a1236; color:var(--purple); border-radius:4px; padding:2px 6px; }
+    .slider-row { margin-bottom: 8px; }
+    .slider-row label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .slider-row label span { color: var(--text); font-weight: 600; }
+    input[type=range] {
+      width: 100%; accent-color: var(--purple); cursor: pointer;
+      height: 4px; appearance: none; background: var(--border); border-radius: 2px; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none; width: 14px; height: 14px; border-radius: 50%;
+      background: var(--purple); cursor: pointer;
+    }
+
+    /* ── Right panel: authorities ── */
+    .auth-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .auth-row:last-child { border-bottom: none; }
+    .auth-avatar-sm {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg,#1f6feb,#58a6ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .auth-info { flex: 1; min-width: 0; }
+    .auth-name-sm { font-size: 12px; font-weight: 600; }
+    .rep-track-sm { background: var(--border); border-radius: 3px; height: 4px; margin-top: 4px; overflow: hidden; }
+    .rep-fill-sm  { height: 100%; background: var(--accent); border-radius: 3px; transition: width .5s; }
+    .auth-weight-sm { font-size: 12px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+
+    /* ── Blockchain ── */
+    .chain-list { display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto; padding-right: 2px; }
+    .chain-list::-webkit-scrollbar { width: 3px; }
+    .chain-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .block-item { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; animation: fadeIn .25s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+    .block-top { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+    .block-idx { background:#1f6feb20; color:var(--accent); border-radius:4px; padding:1px 7px; font-size:10px; font-weight:700; }
+    .block-time { font-size: 10px; color: var(--muted); margin-left: auto; }
+    .block-hash { font-family: monospace; font-size: 10px; color: var(--muted); word-break: break-all; }
+    .ev { display:inline-block; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; }
+    .ev-genesis   { background:#21262d; color:var(--muted); }
+    .ev-vote      { background:#122117; color:var(--green); }
+    .ev-start     { background:#1a1236; color:var(--purple); }
+    .ev-closed    { background:#1c1400; color:var(--yellow); }
+    .ev-share     { background:#0d1f3c; color:var(--accent); }
+    .ev-complete  { background:#1c1400; color:var(--yellow); }
+    .ev-rep       { background:#21262d; color:var(--muted); }
+    .ev-other     { background:#21262d; color:var(--muted); }
+
+    .refresh-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; padding: 3px 9px; font-size: 11px; cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .refresh-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    /* ── Failed state ── */
+    .failed-banner {
+      background: linear-gradient(135deg, #2a0f0f, #1a0808);
+      border: 1px solid #f8514950; border-radius: var(--radius);
+      padding: 20px 22px; margin-bottom: 18px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .failed-icon { font-size: 36px; flex-shrink: 0; }
+    .failed-title { font-size: 18px; font-weight: 700; color: var(--red); margin-bottom: 4px; }
+    .failed-sub   { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .failed-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 16px 0; }
+    .failed-stat {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; text-align: center;
+    }
+    .failed-stat .fs-num { font-size: 24px; font-weight: 700; }
+    .failed-stat .fs-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+    .fs-num.red    { color: var(--red); }
+    .fs-num.yellow { color: var(--yellow); }
+    .fs-num.green  { color: var(--green); }
+    .auth-failure-grid { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+    .auth-failure-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .auth-failure-row.f-valid   { border-color: #2ea04340; }
+    .auth-failure-row.f-cheated { border-color: #f8514940; background: #2a0f0f20; }
+    .auth-failure-row.f-skipped { border-color: #d2992240; background: #1c140020; }
+    .auth-failure-row.f-idle    { opacity: .5; }
+    .penalty-tag {
+      margin-left: auto; font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 12px;
+    }
+    .penalty-tag.valid   { background:#122117; color:var(--green); }
+    .penalty-tag.cheated { background:#2a0f0f; color:var(--red); }
+    .penalty-tag.skipped { background:#1c1400; color:var(--yellow); }
+    .penalty-tag.idle    { background:#21262d; color:var(--muted); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 16px; font-size: 13px;
+      box-shadow: 0 8px 24px #0008; opacity: 0; transform: translateY(8px);
+      transition: all .2s ease; pointer-events: none; z-index: 999; max-width: 280px;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Voter chips ── */
+    .voter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+    .voter-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #122117; border: 1px solid #2ea04340;
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 12px; font-weight: 600; color: var(--green);
+      animation: fadeIn .2s ease;
+    }
+
+    /* ── Misc ── */
+    .info-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: var(--muted); }
+    .info-row .val   { font-weight: 600; }
+    .notice { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🗳</div>
+  <div>
+    <h1>S³-Vote</h1>
+    <p>Secure · Scalable · Sovereign</p>
+  </div>
+  <div class="header-right">
+    <span class="round-pill" id="round-pill">Round 0</span>
+    <div class="status-pill"><span class="dot"></span><span id="status-text">connecting…</span></div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── Left: phase panel ── -->
+  <div id="phase-panel"></div>
+
+  <!-- ── Right: always-visible sidebar ── -->
+  <div>
+
+    <!-- Authorities -->
+    <div class="card">
+      <div class="card-header">
+        <h2>👥 Authorities</h2>
+        <span id="next-threshold-label" style="font-size:12px;color:var(--muted);">threshold —</span>
+      </div>
+      <div class="card-body" id="auth-list" style="padding:14px 18px;"></div>
+    </div>
+
+    <!-- Election parameters (threshold + Shamir) -->
+    <div class="card" id="params-card">
+      <div class="card-header">
+        <h2>⚙️ Key Parameters</h2>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="label">Weight threshold</span>
+          <span class="val" id="param-threshold" style="color:var(--accent)">—</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Min shares (Shamir)</span>
+          <span class="val" id="param-shamir" style="color:var(--purple)">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blockchain -->
+    <div class="card">
+      <div class="card-header">
+        <h2>⛓ Blockchain</h2>
+        <button class="refresh-btn" onclick="loadChain()">↻</button>
+      </div>
+      <div class="card-body" style="padding:12px;">
+        <div class="chain-list" id="chain-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+const SHAMIR_N = 6;
+let lastStatus    = null;
+let lastVoteCount = 0;
+
+// ── Toast ──────────────────────────────────────────────────────────
+function toast(msg, color) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.borderColor = color || 'var(--border)';
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ── Polling ────────────────────────────────────────────────────────
+async function poll() {
+  try {
+    const [stateRes, authRes] = await Promise.all([
+      fetch('/election/state'),
+      fetch('/authorities'),
+    ]);
+    const state = await stateRes.json();
+    const auths = await authRes.json();
+
+    document.getElementById('round-pill').textContent =
+      state.round > 0 ? `Round ${state.round}` : 'No election yet';
+    document.getElementById('status-text').textContent = 'running';
+
+    renderAuthorities(auths, state.threshold);
+    updateParamsCard(state);
+
+    if (state.status !== lastStatus) {
+      lastStatus = state.status;
+      renderPhase(state);
+    } else {
+      refreshPhaseData(state);
+    }
+  } catch(e) {
+    document.getElementById('status-text').textContent = 'offline';
+  }
+}
+
+setInterval(poll, 2000);
+poll();
+setInterval(loadChain, 5000);
+setTimeout(loadChain, 500);
+
+// ── Route to correct phase renderer ───────────────────────────────
+function renderPhase(state) {
+  const panel = document.getElementById('phase-panel');
+  switch(state.status) {
+    case 'idle':           panel.innerHTML = htmlIdle(state);           break;
+    case 'active':         panel.innerHTML = htmlActive(state);         break;
+    case 'reconstruction': panel.innerHTML = htmlReconstruction(state); break;
+    case 'failed':         panel.innerHTML = htmlFailed(state);         break;
+    case 'complete':       panel.innerHTML = htmlComplete(state);       break;
+  }
+}
+
+function refreshPhaseData(state) {
+  switch(state.status) {
+    case 'active':         updateActiveData(state);         break;
+    case 'reconstruction': updateReconstructData(state);    break;
+  }
+}
+
+// ── IDLE: create election ──────────────────────────────────────────
+function htmlIdle(state) {
+  return `
+  <div class="card">
+    <div class="card-header">
+      <h2>📋 New Election</h2>
+      <span class="phase-badge idle">Idle</span>
+    </div>
+    <div class="card-body">
+
+      <div class="form-group">
+        <label>Election Title</label>
+        <input type="text" id="inp-title" placeholder="e.g. Board Director Election 2025" />
+      </div>
+
+      <div class="form-group">
+        <label>Number of Voters</label>
+        <input type="number" id="inp-voters" value="5" min="1" max="100" />
+      </div>
+
+      <div class="form-group">
+        <label>Options</label>
+        <div id="options-list">
+          <div class="option-row">
+            <input type="text" value="Option A" placeholder="Option A" />
+            <button class="btn-icon" onclick="removeOption(this)">×</button>
+          </div>
+          <div class="option-row">
+            <input type="text" value="Option B" placeholder="Option B" />
+            <button class="btn-icon" onclick="removeOption(this)">×</button>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addOption()">+ Add Option</button>
+      </div>
+
+      <p class="notice">
+        Keys will be generated when you start. The private key is split into
+        ${SHAMIR_N} shares using a <strong>${state.shamir_t}-of-${SHAMIR_N}</strong>
+        Shamir scheme — derived from the current reputation state.
+        Reconstruction also requires combined reputation weight ≥&nbsp;<strong>${state.threshold}</strong>.
+      </p>
+
+      <button class="btn btn-primary" onclick="createElection()" id="btn-create">
+        🔑 Generate Keys &amp; Start Election
+      </button>
+    </div>
+  </div>`;
+}
+
+function addOption() {
+  const list = document.getElementById('options-list');
+  const row = document.createElement('div');
+  row.className = 'option-row';
+  row.innerHTML = `<input type="text" placeholder="New option" /><button class="btn-icon" onclick="removeOption(this)">×</button>`;
+  list.appendChild(row);
+  row.querySelector('input').focus();
+}
+
+function removeOption(btn) {
+  const list = document.getElementById('options-list');
+  if (list.children.length > 2) btn.closest('.option-row').remove();
+  else toast('Need at least 2 options', 'var(--red)');
+}
+
+async function createElection() {
+  const title   = document.getElementById('inp-title').value.trim();
+  const voters  = parseInt(document.getElementById('inp-voters').value);
+  const options = Array.from(document.querySelectorAll('#options-list input')).map(i => i.value.trim()).filter(Boolean);
+
+  if (!title)           return toast('Enter a title', 'var(--red)');
+  if (options.length<2) return toast('Need at least 2 options', 'var(--red)');
+  if (voters < 1)       return toast('Need at least 1 voter', 'var(--red)');
+
+  const btn = document.getElementById('btn-create');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating keys…';
+
+  try {
+    const r = await fetch('/election/create', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({title, options, num_voters: voters}),
+    });
+    const d = await r.json();
+    if (d.status === 'ok') {
+      toast(`Election started! Threshold: ${d.threshold}`, 'var(--green)');
+      loadChain();
+    } else {
+      toast(d.error || 'Error', 'var(--red)');
+      btn.disabled = false;
+      btn.textContent = '🔑 Generate Keys & Start Election';
+    }
+  } catch { toast('Network error', 'var(--red)'); btn.disabled = false; }
+}
+
+// ── ACTIVE: voting ─────────────────────────────────────────────────
+function htmlActive(state) {
+  const pct     = state.num_voters > 0 ? Math.round((state.votes_cast / state.num_voters) * 100) : 0;
+  const optBtns = state.options.map(o =>
+    `<button class="btn-option" onclick="castVote('${o}')">${o}</button>`
+  ).join('');
+
+  // Build voter chips for any votes already cast when this phase renders
+  lastVoteCount = 0;
+  const voterEntries = Array.from({length: state.votes_cast}, (_, i) =>
+    `<span class="voter-chip">✓ V${i+1}</span>`
+  ).join('');
+  lastVoteCount = state.votes_cast;
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <h2>🗳 ${state.title}</h2>
+      <span class="phase-badge active">Voting Open</span>
+    </div>
+    <div class="card-body">
+      <div class="info-row"><span class="label">Round</span><span class="val">${state.round}</span></div>
+
+      <div style="margin: 16px 0;">
+        <div class="progress-label" id="vote-label">${state.votes_cast} of ${state.num_voters} votes cast</div>
+        <div class="progress-track"><div class="progress-fill" id="vote-bar" style="width:${pct}%"></div></div>
+        <div class="voter-chips" id="voter-log">${voterEntries}</div>
+      </div>
+
+      <div class="option-grid" id="option-grid">${optBtns}</div>
+
+      <p class="notice">Each vote is encrypted with the election's ElGamal public key before being written to the blockchain. Neither the options nor the tally are visible until reconstruction.</p>
+
+      <button class="btn btn-danger" onclick="endVoting()" style="margin-top:14px;">End Voting Early</button>
+    </div>
+  </div>`;
+}
+
+function updateActiveData(state) {
+  const pct = state.num_voters > 0 ? Math.round((state.votes_cast / state.num_voters) * 100) : 0;
+  const lbl = document.getElementById('vote-label');
+  const bar = document.getElementById('vote-bar');
+  if (lbl) lbl.textContent = `${state.votes_cast} of ${state.num_voters} votes cast`;
+  if (bar) bar.style.width = pct + '%';
+
+  // Append new voter entries for any votes cast since last poll
+  if (state.votes_cast > lastVoteCount) {
+    const log = document.getElementById('voter-log');
+    if (log) {
+      for (let i = lastVoteCount + 1; i <= state.votes_cast; i++) {
+        const el = document.createElement('span');
+        el.className = 'voter-chip';
+        el.textContent = `✓ V${i}`;
+        log.appendChild(el);
+      }
+    }
+    lastVoteCount = state.votes_cast;
+  }
+}
+
+async function castVote(option) {
+  const btns = document.querySelectorAll('.btn-option');
+  btns.forEach(b => b.disabled = true);
+  try {
+    const r = await fetch('/election/vote', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({option}),
+    });
+    const d = await r.json();
+    if (d.votes_cast !== undefined) {
+      toast(`Vote for "${option}" encrypted & stored`, 'var(--green)');
+      loadChain();
+      if (d.phase === 'reconstruction') {
+        toast('All votes cast — moving to reconstruction', 'var(--purple)');
+      }
+    } else {
+      toast(d.error || 'Error', 'var(--red)');
+    }
+  } catch { toast('Network error', 'var(--red)'); }
+  finally { btns.forEach(b => b.disabled = false); }
+}
+
+async function endVoting() {
+  if (!confirm('End the voting phase now?')) return;
+  await fetch('/election/end', {method:'POST'});
+  toast('Voting closed — reconstruction phase begins', 'var(--purple)');
+  loadChain();
+}
+
+// ── RECONSTRUCTION: share submission ──────────────────────────────
+function htmlReconstruction(state) {
+  const sharesPct = Math.min(100, Math.round((state.submitted_shares.length / state.shamir_t) * 100));
+  const weightPct = Math.min(100, Math.round((state.coalition_weight / state.threshold) * 100));
+
+  const cheaters = state.cheaters || [];
+  const skipped  = state.skipped  || [];
+  const authRows = Object.entries(state.weights).map(([name, weight]) => {
+    const done    = state.submitted_shares.includes(name);
+    const cheated = cheaters.includes(name);
+    const didSkip = skipped.includes(name);
+    let action;
+    if (done)     action = `<span class="submitted-check">✓ Submitted</span>`;
+    else if (cheated)  action = `<span class="cheater-mark">✗ Invalid Share</span>`;
+    else if (didSkip)  action = `<span class="skipped-mark">— Skipped</span>`;
+    else action = `
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="btn btn-submit"   onclick="submitShare('${name}', false, false)">✓ Submit</button>
+        <button class="btn-submit-wrong" onclick="submitShare('${name}', true,  false)">✗ Wrong</button>
+        <button class="btn-submit-skip"  onclick="submitShare('${name}', false, true)">— Skip</button>
+      </div>`;
+    return `
+    <div class="auth-submit-row ${done ? 'submitted' : ''} ${cheated ? 'cheater' : ''} ${didSkip ? 'skipped' : ''}" id="row-${name}">
+      <div class="auth-avatar">${name[0]}</div>
+      <div class="auth-submit-info">
+        <div class="auth-submit-name">${name}</div>
+        <div class="auth-submit-weight">Weight: ${weight}x</div>
+      </div>
+      ${action}
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <h2>🔓 Reconstruction Phase</h2>
+      <span class="phase-badge reconstruction">Decryption</span>
+    </div>
+    <div class="card-body">
+      <div class="info-row"><span class="label">Election</span><span class="val">${state.title}</span></div>
+      <div class="info-row"><span class="label">Round</span><span class="val">${state.round}</span></div>
+      <div class="info-row"><span class="label">Votes cast</span><span class="val">${state.votes_cast}</span></div>
+
+      <div class="threshold-meters" style="margin-top:14px;">
+        <div class="meter-box">
+          <div class="meter-label">Shares (min ${state.shamir_t})</div>
+          <div class="meter-track"><div class="meter-fill shares" id="m-shares" style="width:${sharesPct}%"></div></div>
+          <div class="meter-value shares" id="v-shares">${state.submitted_shares.length} / ${state.shamir_t}</div>
+        </div>
+        <div class="meter-box">
+          <div class="meter-label">Weight (need ≥ ${state.threshold})</div>
+          <div class="meter-track"><div class="meter-fill weight" id="m-weight" style="width:${weightPct}%"></div></div>
+          <div class="meter-value weight" id="v-weight">${state.coalition_weight} / ${state.threshold}</div>
+        </div>
+      </div>
+
+      <p class="notice">
+        Reconstruction requires <strong>at least ${state.shamir_t} shares</strong>
+        (Shamir threshold) <em>and</em> combined reputation weight
+        ≥&nbsp;<strong>${state.threshold}</strong> (adaptive threshold).
+        High-reputation authorities carry more weight.
+      </p>
+
+      <div class="auth-submit-grid" id="auth-submit-list">${authRows}</div>
+    </div>
+  </div>`;
+}
+
+function updateReconstructData(state) {
+  const sharesPct = Math.min(100, Math.round((state.submitted_shares.length / state.shamir_t) * 100));
+  const weightPct = Math.min(100, Math.round((state.coalition_weight / state.threshold) * 100));
+
+  const ms = document.getElementById('m-shares');
+  const mw = document.getElementById('m-weight');
+  const vs = document.getElementById('v-shares');
+  const vw = document.getElementById('v-weight');
+  if (ms) ms.style.width = sharesPct + '%';
+  if (mw) mw.style.width = weightPct + '%';
+  if (vs) vs.textContent = `${state.submitted_shares.length} / ${state.shamir_t}`;
+  if (vw) vw.textContent = `${state.coalition_weight} / ${state.threshold}`;
+
+  // Update submitted rows
+  state.submitted_shares.forEach(name => {
+    const row = document.getElementById(`row-${name}`);
+    if (row && !row.classList.contains('submitted')) {
+      row.classList.add('submitted');
+      const actions = row.querySelector('div[style]') || row.querySelector('button');
+      if (actions) actions.replaceWith(Object.assign(document.createElement('span'), {
+        className: 'submitted-check', textContent: '✓ Submitted'
+      }));
+    }
+  });
+
+  // Update cheater rows
+  (state.cheaters || []).forEach(name => {
+    const row = document.getElementById(`row-${name}`);
+    if (row && !row.classList.contains('cheater')) {
+      row.classList.add('cheater');
+      const actions = row.querySelector('div[style]') || row.querySelector('button');
+      if (actions) actions.replaceWith(Object.assign(document.createElement('span'), {
+        className: 'cheater-mark', textContent: '✗ Invalid Share'
+      }));
+    }
+  });
+
+  // Update skipped rows
+  (state.skipped || []).forEach(name => {
+    const row = document.getElementById(`row-${name}`);
+    if (row && !row.classList.contains('skipped')) {
+      row.classList.add('skipped');
+      const actions = row.querySelector('div[style]') || row.querySelector('button');
+      if (actions) actions.replaceWith(Object.assign(document.createElement('span'), {
+        className: 'skipped-mark', textContent: '— Skipped'
+      }));
+    }
+  });
+}
+
+async function submitShare(authority, tampered = false, skip = false) {
+  const row  = document.getElementById(`row-${authority}`);
+  const btns = row ? row.querySelectorAll('button') : [];
+  btns.forEach(b => b.disabled = true);
+  try {
+    const r = await fetch('/election/submit-share', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({authority, tampered, skip}),
+    });
+    const d = await r.json();
+    if (d.error) {
+      toast(d.error, 'var(--red)');
+      btns.forEach(b => b.disabled = false);
+      return;
+    }
+    loadChain();
+    if (d.skipped) {
+      toast(`${authority} chose not to participate`, 'var(--yellow)');
+    } else if (!d.verified) {
+      toast(`⚠ ${authority}'s share is INVALID — PVSS verification failed!`, 'var(--red)');
+    } else {
+      toast(`${authority} submitted valid share (weight: ${d.coalition_weight} / ${d.threshold})`,
+            d.reconstructed ? 'var(--yellow)' : 'var(--purple)');
+      if (d.reconstructed) toast('🔓 Threshold met — votes decrypted!', 'var(--yellow)');
+    }
+  } catch { toast('Network error', 'var(--red)'); btns.forEach(b => b.disabled = false); }
+}
+
+// ── FAILED: reconstruction impossible ─────────────────────────────
+function htmlFailed(state) {
+  const cheaters  = state.cheaters || [];
+  const skipped   = state.skipped  || [];
+  const valid     = state.submitted_shares || [];
+  const acted     = new Set([...valid, ...cheaters, ...skipped]);
+  const idle      = Object.keys(state.weights).filter(n => !acted.has(n));
+
+  const shamir_t  = state.shamir_t;
+  const threshold = state.threshold;
+  const avgNeeded = shamir_t > 0 ? threshold / shamir_t : 1;
+
+  const authorityRows = Object.keys(state.weights).map(name => {
+    const w         = state.weights[name];
+    const isValid   = valid.includes(name);
+    const isCheated = cheaters.includes(name);
+    const isSkipped = skipped.includes(name);
+    const isIdle    = idle.includes(name);
+
+    let rowClass, tagClass, tagLabel, penaltyNote;
+    if (isValid) {
+      rowClass   = 'f-valid';
+      tagClass   = 'valid';
+      tagLabel   = '✓ Valid Share';
+      const C    = Math.min(1.0, +(w / avgNeeded).toFixed(2));
+      penaltyNote= `P 1.0 · C ${C} · H 1.0`;
+    } else if (isCheated) {
+      rowClass   = 'f-cheated';
+      tagClass   = 'cheated';
+      tagLabel   = '✗ Cheated';
+      penaltyNote= 'P 0.5 · C 0.0 · H 0.0';
+    } else if (isSkipped) {
+      rowClass   = 'f-skipped';
+      tagClass   = 'skipped';
+      tagLabel   = '— Skipped';
+      penaltyNote= 'P 0.0 · C 0.0 · H 0.5';
+    } else {
+      rowClass   = 'f-idle';
+      tagClass   = 'idle';
+      tagLabel   = 'Did not act';
+      penaltyNote= 'P 0.0 · C 0.0 · H 0.5';
+    }
+
+    return `
+    <div class="auth-failure-row ${rowClass}">
+      <div class="auth-avatar">${name[0]}</div>
+      <div class="auth-submit-info">
+        <div class="auth-submit-name">${name}</div>
+        <div class="auth-submit-weight" style="font-size:11px;color:var(--muted);">New scores → ${penaltyNote}</div>
+      </div>
+      <span class="penalty-tag ${tagClass}">${tagLabel}</span>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="card" style="border-color:#f8514960;">
+    <div class="card-header" style="background:#2a0f0f20;">
+      <h2 style="color:var(--red);">💀 Reconstruction Failed</h2>
+      <span class="phase-badge" style="background:#2a0f0f;color:var(--red);border:1px solid #f8514940;">Round ${state.round} — Failed</span>
+    </div>
+    <div class="card-body">
+
+      <div class="failed-banner">
+        <div class="failed-icon">🔐</div>
+        <div>
+          <div class="failed-title">The private key cannot be recovered</div>
+          <div class="failed-sub">
+            Reconstruction requires <strong>${shamir_t} valid shares</strong>, but too many
+            authorities cheated or skipped. The encrypted votes are permanently locked.
+            Penalties will be applied and the threshold will rise for the next election.
+          </div>
+        </div>
+      </div>
+
+      <div class="failed-stats">
+        <div class="failed-stat">
+          <div class="fs-num green">${valid.length}</div>
+          <div class="fs-lbl">Valid shares</div>
+        </div>
+        <div class="failed-stat">
+          <div class="fs-num red">${cheaters.length}</div>
+          <div class="fs-lbl">Cheaters</div>
+        </div>
+        <div class="failed-stat">
+          <div class="fs-num yellow">${skipped.length}</div>
+          <div class="fs-lbl">Skipped</div>
+        </div>
+      </div>
+
+      <p style="font-size:13px;font-weight:600;margin-bottom:10px;">Penalty breakdown</p>
+      <div class="auth-failure-grid">${authorityRows}</div>
+
+      <button class="btn btn-danger" id="btn-failure" onclick="applyFailure()" style="margin-top:6px;width:100%;font-size:14px;padding:13px;">
+        ⚠ Apply Penalties &amp; Unlock Next Election
+      </button>
+    </div>
+  </div>`;
+}
+
+async function applyFailure() {
+  const btn = document.getElementById('btn-failure');
+  if (btn) { btn.disabled = true; btn.textContent = 'Applying…'; }
+  try {
+    const r = await fetch('/election/apply-failure', { method: 'POST' });
+    const d = await r.json();
+    if (d.next_threshold !== undefined) {
+      toast(`Penalties applied. Next threshold: ${d.next_threshold}`, 'var(--red)');
+      loadChain();
+    } else {
+      toast(d.error || 'Error', 'var(--red)');
+      if (btn) { btn.disabled = false; btn.textContent = '⚠ Apply Penalties & Unlock Next Election'; }
+    }
+  } catch { toast('Network error', 'var(--red)'); }
+}
+
+// ── COMPLETE: results + reputation update ─────────────────────────
+function htmlComplete(state) {
+  const total = Object.values(state.tally).reduce((a,b) => a+b, 0);
+  const colors = ['#3fb950','#58a6ff','#a371f7','#d29922','#f85149','#79c0ff'];
+
+  const bars = Object.entries(state.tally).map(([opt,count], i) => {
+    const pct = total > 0 ? Math.round((count/total)*100) : 0;
+    return `
+    <div class="tally-row">
+      <div class="tally-row-top">
+        <span class="tally-option">${opt}</span>
+        <span class="tally-count">${count} vote${count!==1?'s':''} · ${pct}%</span>
+      </div>
+      <div class="tally-track">
+        <div class="tally-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const cheaters = state.cheaters || [];
+  const skipped  = state.skipped  || [];
+
+  // Auto-score each authority from what actually happened this round.
+  //
+  // Participation (P): did they submit a share at all?
+  //   valid → 1.0 | wrong → 0.5 (showed up but cheated) | absent → 0.0
+  //
+  // Contribution (C): how much did their weight cover the "average share" needed?
+  //   avgNeeded = threshold / shamir_t  (weight one share must carry on average)
+  //   valid → min(1, weight / avgNeeded) | otherwise → 0.0
+  //   Higher-reputation authorities naturally score higher here.
+  //
+  // Honesty (H): did they submit the correct share?
+  //   valid → 1.0 | cheated → 0.0 | absent → 0.5 (neutral — didn't lie)
+  function autoScore(name) {
+    const submitted = state.submitted_shares.includes(name);
+    const cheated   = cheaters.includes(name);
+    const w         = state.weights[name] || 0;
+    const avgNeeded = state.shamir_t > 0 ? state.threshold / state.shamir_t : 1;
+
+    const P = submitted ? 1.0 : cheated ? 0.5 : 0.0;
+    const C = submitted ? Math.min(1.0, +(w / avgNeeded).toFixed(2)) : 0.0;
+    const H = submitted ? 1.0 : cheated ? 0.0 : 0.5;
+
+    const round1 = v => (Math.round(v * 10) / 10).toFixed(1);
+    return { P: round1(P), C: round1(C), H: round1(H) };
+  }
+
+  const sliders = Object.entries(state.weights).map(([name]) => {
+    const participated = state.submitted_shares.includes(name);
+    const cheated      = cheaters.includes(name);
+    const didSkip      = skipped.includes(name);
+    const { P: defP, C: defC, H: defH } = autoScore(name);
+    const borderStyle  = cheated ? 'border-color:#f8514950;' : didSkip ? 'border-color:#d2992240;' : '';
+    return `
+    <div class="rep-card ${participated && !cheated ? 'participated' : ''}" style="${borderStyle}">
+      <div class="rep-card-name">
+        ${name}
+        ${cheated     ? '<span class="participated-tag" style="background:#2a0f0f;color:var(--red);">⚠ cheated</span>' : ''}
+        ${didSkip     ? '<span class="participated-tag" style="background:#1c1400;color:var(--yellow);">— skipped</span>' : ''}
+        ${participated ? '<span class="participated-tag">participated</span>' : ''}
+      </div>
+      <input type="hidden" data-name="${name}" data-score="participation" value="${defP}" />
+      <input type="hidden" data-name="${name}" data-score="contribution"  value="${defC}" />
+      <input type="hidden" data-name="${name}" data-score="honesty"       value="${defH}" />
+      <div class="info-row" style="padding:5px 0;">
+        <span class="label">Participation</span>
+        <span class="val" style="color:var(--accent)">${defP}</span>
+      </div>
+      <div class="info-row" style="padding:5px 0;">
+        <span class="label">Contribution</span>
+        <span class="val" style="color:var(--accent)">${defC}</span>
+      </div>
+      <div class="info-row" style="padding:5px 0;">
+        <span class="label">Honesty</span>
+        <span class="val" style="color:var(--accent)">${defH}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <h2>📊 Results — ${state.title}</h2>
+      <span class="phase-badge complete">Round ${state.round} Complete</span>
+    </div>
+    <div class="card-body">
+      <div class="info-row"><span class="label">Coalition</span><span class="val">${state.submitted_shares.join(', ')}</span></div>
+      <div class="info-row"><span class="label">Coalition weight</span><span class="val" style="color:var(--purple)">${state.coalition_weight} / ${state.threshold}</span></div>
+      <div style="margin-top:16px;">${bars}</div>
+
+      <p class="rep-section-title">Authority Reputation Update</p>
+      <p class="rep-section-sub">
+        Scores are calculated automatically from each authority's behaviour this round
+        and will adjust the <strong>threshold for the next election</strong>.
+      </p>
+      <div class="rep-grid">${sliders}</div>
+
+      <button class="btn btn-primary" id="btn-apply" onclick="updateReputations()">
+        ✓ Apply &amp; Unlock Next Election
+      </button>
+    </div>
+  </div>`;
+}
+
+
+async function updateReputations() {
+  const updates = {};
+  document.querySelectorAll('input[type=hidden][data-name]').forEach(s => {
+    const name  = s.dataset.name;
+    const score = s.dataset.score;
+    if (!updates[name]) updates[name] = {};
+    updates[name][score] = parseFloat(s.value);
+  });
+
+  const btn = document.getElementById('btn-apply');
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+
+  try {
+    const r = await fetch('/election/update-reputations', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(updates),
+    });
+    const d = await r.json();
+    if (d.next_threshold !== undefined) {
+      toast(`Reputations updated. Next threshold: ${d.next_threshold}`, 'var(--green)');
+      loadChain();
+    } else {
+      toast(d.error || 'Error', 'var(--red)');
+      if (btn) { btn.disabled = false; btn.textContent = '✓ Apply & Unlock Next Election'; }
+    }
+  } catch { toast('Network error', 'var(--red)'); }
+}
+
+// ── Right panel: key parameters card ──────────────────────────────
+function updateParamsCard(state) {
+  const t = document.getElementById('param-threshold');
+  const s = document.getElementById('param-shamir');
+  if (t) t.textContent = state.threshold !== undefined ? state.threshold : '—';
+  if (s) s.textContent = state.shamir_t  !== undefined ? `${state.shamir_t}-of-${SHAMIR_N}` : '—';
+}
+
+// ── Right panel: authorities ───────────────────────────────────────
+function renderAuthorities(auths, threshold) {
+  const maxRep = Math.max(...auths.map(a => a.reputation), 0.001);
+  document.getElementById('next-threshold-label').textContent = `threshold ${threshold}`;
+  document.getElementById('auth-list').innerHTML = auths.map(a => `
+    <div class="auth-row">
+      <div class="auth-avatar-sm">${a.name[0]}</div>
+      <div class="auth-info">
+        <div class="auth-name-sm">${a.name}</div>
+        <div class="rep-track-sm">
+          <div class="rep-fill-sm" style="width:${Math.round((a.reputation/maxRep)*100)}%"></div>
+        </div>
+      </div>
+      <div class="auth-weight-sm">${a.weight}×</div>
+    </div>
+  `).join('');
+}
+
+// ── Blockchain explorer ────────────────────────────────────────────
+async function loadChain() {
+  try {
+    const r = await fetch('/chain');
+    const blocks = await r.json();
+    const list = document.getElementById('chain-list');
+    list.innerHTML = [...blocks].reverse().map(b => {
+      const ev    = b.index === 0 ? 'genesis' : (b.data.event || 'data');
+      const cls   = evClass(ev);
+      const label = evLabel(ev);
+      const ts    = new Date(b.timestamp * 1000).toLocaleTimeString();
+      return `
+      <div class="block-item">
+        <div class="block-top">
+          <span class="block-idx">#${b.index}</span>
+          <span class="ev ${cls}">${label}</span>
+          <span class="block-time">${ts}</span>
+        </div>
+        <div class="block-hash">${b.hash.substring(0,40)}…</div>
+      </div>`;
+    }).join('');
+  } catch {}
+}
+
+function evClass(ev) {
+  const m = {
+    genesis:'ev-genesis', vote_cast:'ev-vote', election_start:'ev-start',
+    voting_closed:'ev-closed', share_submitted:'ev-share',
+    reconstruction_complete:'ev-complete', reputation_update:'ev-rep',
+    share_invalid:'ev-other', share_skipped:'ev-closed', election_failed:'ev-other',
+  };
+  return m[ev] || 'ev-other';
+}
+function evLabel(ev) {
+  const m = {
+    genesis:'Genesis', vote_cast:'Vote', election_start:'Election Start',
+    voting_closed:'Voting Closed', share_submitted:'Share',
+    reconstruction_complete:'Reconstructed', reputation_update:'Rep Update',
+    share_invalid:'⚠ Invalid Share', share_skipped:'— Skipped', election_failed:'💀 Failed',
+  };
+  return m[ev] || ev;
+}
+</script>
+</body>
+</html>
