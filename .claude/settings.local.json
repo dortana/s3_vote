@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(PYTHONDONTWRITEBYTECODE=1 python -c \"import api.app; print\\('OK'\\)\")"
-    ]
-  }
-}

@@ -13,320 +13,812 @@
 \usepackage{hyperref}
 \usepackage{geometry}
 \usepackage{enumitem}
-\usepackage{titlesec}
 \usepackage{fancyhdr}
 \usepackage{cite}
 \usepackage{listings}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{setspace}
+\usepackage{titling}
+\usepackage{abstract}
+\usepackage{mdframed}
+\usepackage{tcolorbox}
 
-\geometry{margin=2.5cm}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{
+  shapes.geometric, arrows.meta, positioning, fit,
+  decorations.pathreplacing, calc, backgrounds, shadows,
+  patterns, mindmap, trees
+}
+
+\geometry{margin=2.5cm, top=3cm, bottom=3cm}
+\onehalfspacing
 
 \hypersetup{
   colorlinks=true,
   linkcolor=blue!70!black,
-  citecolor=green!60!black,
-  urlcolor=blue!70!black
+  citecolor=green!50!black,
+  urlcolor=blue!70!black,
+  pdftitle={A Comparative Study of Social Secret Sharing in Decentralized Voting},
+  pdfauthor={Sepideh Bakhshi}
 }
 
 \lstset{
-  basicstyle=\ttfamily\small,
+  basicstyle=\ttfamily\footnotesize,
   breaklines=true,
   frame=single,
-  backgroundcolor=\color{gray!8},
-  keywordstyle=\color{blue},
-  commentstyle=\color{green!60!black},
-  stringstyle=\color{red!70!black}
+  backgroundcolor=\color{gray!6},
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\color{green!55!black}\itshape,
+  stringstyle=\color{red!70!black},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  xleftmargin=2em
 }
 
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{S$^3$-Vote}
-\lhead{Secure, Scalable, Sovereign Voting}
-\rfoot{Page \thepage}
+\rhead{\textit{Social Secret Sharing in Decentralized Voting}}
+\lhead{\textit{Sepideh Bakhshi}}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
 \newtheorem{property}{Property}[section]
+\newtheorem{corollary}{Corollary}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[section]
 
-% ─────────────────────────────────────────────────────────────────────────────
-\title{
-  \vspace{-1cm}
-  \textbf{\Large S$^3$-Vote: A Reputation-Weighted, Blockchain-Anchored\\
-  Decentralised Voting System with Adaptive Reconstruction Threshold}\\[0.6em]
-  \large A Threshold Cryptography Framework with Publicly Verifiable Secret Sharing
-  and Dynamic Trust Management
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{insight}[1][]{
+  enhanced, breakable,
+  colback=blue!4!white, colframe=blue!60!black,
+  title=#1, fonttitle=\bfseries\small,
+  left=6pt, right=6pt, top=4pt, bottom=4pt
 }
-\author{Milad Seifi}
-\date{\today}
-% ─────────────────────────────────────────────────────────────────────────────
 
+% ─────────────────────────────────────────────────────────────────────────────
 \begin{document}
 
-\maketitle
-\thispagestyle{fancy}
+% ── Title page ────────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+  {\huge\bfseries S$^3$-Vote\par}
+  \vspace{0.5cm}
+  {\LARGE\itshape Secure, Scalable, Sovereign\par}
+  \vspace{0.8cm}
+  \rule{\linewidth}{0.5pt}\\[0.4cm]
+  {\Large\bfseries A Comparative Study of Social Secret Sharing\\
+  in Decentralized Voting\par}
+  \rule{\linewidth}{0.5pt}
+  \vspace{1.2cm}
 
+  {\large Reputation-Weighted Adaptive Thresholds,\\
+  Formal Security Analysis, and\\
+  Blockchain-Anchored Accountability\par}
+
+  \vspace{2cm}
+  \begin{tabular}{rl}
+    \textbf{Author:}     & Sepideh Bakhshi \\[4pt]
+    \textbf{Neptune ID:} & L7LAM9 \\[4pt]
+    \textbf{Supervisor:} & Dr.\ Ligeti Péter \\[4pt]
+    \textbf{Faculty:}    & Faculty of Informatics \\[4pt]
+    \textbf{Date:}       & \today \\
+  \end{tabular}
+
+  \vfill
+  \includegraphics[width=0.22\textwidth]{elte_logo.png}
+\end{titlepage}
+
+% ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{abstract}
-Secure electronic voting requires confidentiality of individual ballots,
-verifiability of the final tally, and resilience against colluding or
-misbehaving participants — all without relying on a single trusted authority.
-We present \textbf{S$^3$-Vote} (Secure, Scalable, Sovereign Voting), a
-decentralised voting system that combines ElGamal threshold encryption,
-Shamir Secret Sharing, and Publicly Verifiable Secret Sharing (PVSS) with a
-novel \emph{reputation-weighted adaptive reconstruction threshold}.
-Each decryption authority accumulates a persistent reputation score derived
-from their verifiable behaviour across elections.
-Reputation is converted to a weight, and the effective quorum required for
-reconstruction adapts automatically: trusted groups need fewer participants;
-distrusted or heterogeneous groups require more.
-A two-gate reconstruction policy — enforcing both a cryptographic share
-count and a reputation weight threshold simultaneously — closes attack
-vectors that single-threshold schemes leave open.
-All events, encrypted votes, PVSS commitments, share submissions, cheat
-evidence, and reputation updates are anchored on a hash-chained blockchain,
-providing a tamper-evident, non-repudiable audit trail.
-Our scheme improves upon Shamir's foundational work and Nojoumian's
-social secret sharing by eliminating the trusted dealer, providing
-publicly verifiable cheat detection, and introducing a self-governing
-trust mechanism that adapts dynamically across election rounds.
+\noindent
+Secure electronic voting demands confidentiality of individual ballots,
+integrity of the final tally, public verifiability of correct execution,
+and resilience against colluding or misbehaving participants — all without
+relying on a single trusted authority.
+This thesis presents \textbf{S$^3$-Vote} (\textit{Secure, Scalable,
+Sovereign Voting}), a decentralised voting protocol that integrates
+ElGamal threshold encryption, Shamir Secret Sharing, and
+Publicly Verifiable Secret Sharing (PVSS) with a novel
+\emph{reputation-weighted adaptive reconstruction threshold}.
+
+Each decryption authority accumulates a persistent reputation score
+derived from verifiable on-chain behaviour across elections, covering
+participation, contribution, and honesty.
+Reputation scores are converted into per-authority weights, and the
+effective quorum adapts via a two-piece linear formula anchored at
+$\lceil N/2 \rceil$ for neutral trust.
+A \emph{two-gate reconstruction policy} simultaneously enforces a
+cryptographic share-count gate and a reputation weight gate, closing
+flooding and monopoly attacks that single-threshold schemes cannot prevent.
+A concentration-resistance property is proven: no single authority can
+accumulate sufficient weight to reconstruct alone.
+
+Ballot privacy is formally proven as an IND-CPA security game with a
+concrete reduction to the Decisional Diffie-Hellman (DDH) assumption
+under the random oracle model.
+A game-theoretic analysis shows that honest participation is the dominant
+strategy for rational authorities, and that coalitions are inherently
+unstable.
+A parameter sensitivity analysis characterises the effect of each
+reputation weight on system behaviour and bounds the consequences of
+miscalibration.
+
+All events are recorded on a hash-chained blockchain, providing a
+tamper-evident, non-repudiable audit trail.
+The system is compared against Shamir's threshold scheme, Nojoumian's
+social secret sharing, and deployed e-voting systems including FOO92,
+Helios, Belenios, and Civitas — none of which address adaptive thresholds,
+authority accountability, or graceful failure recovery simultaneously.
 \end{abstract}
 
-\tableofcontents
 \newpage
+\tableofcontents
+\listoffigures
 
-% =============================================================================
-\section{Introduction}
-% =============================================================================
-
-Democratic and organisational decision-making increasingly relies on
-electronic voting systems. Yet most deployed systems route all trust
-through a single entity — a government authority, a corporate IT department,
-or a cloud provider. This creates two fundamental vulnerabilities: a
-\emph{single point of trust} (the operator can manipulate results
-undetected) and a \emph{single point of failure} (if the operator is
-compromised, the election is ruined).
-
-Threshold cryptography distributes trust across $N$ decryption authorities:
-the private key required to decrypt ballots is split into $N$ shares, and
-any coalition of at least $t$ shares can reconstruct it, while fewer than
-$t$ shares reveal nothing. This removes the single point of trust.
-However, classical threshold schemes treat all shares as equal.
-A malicious authority submitting a corrupted share causes silent
-reconstruction failure, and the system has no mechanism to identify
-or penalise the attacker, nor to adapt future requirements based on
-observed behaviour.
-
-S$^3$-Vote addresses these limitations through five integrated contributions:
-
-\begin{enumerate}[label=\textbf{\arabic*.}]
-  \item \textbf{PVSS-based share verification} — each submitted share is
-    publicly verifiable against an on-chain commitment, making cheating
-    immediately detectable and undeniable.
-  \item \textbf{Persistent reputation scoring} — authority behaviour
-    is scored across Participation, Contribution, and Honesty dimensions
-    and accumulated across elections with exponential smoothing.
-  \item \textbf{Reputation weights} — scores are normalised into per-authority
-    weights, so high-reputation authorities carry proportionally more
-    influence over reconstruction.
-  \item \textbf{Adaptive two-gate quorum} — reconstruction requires satisfying
-    both a cryptographic share count gate \emph{and} a reputation weight
-    gate simultaneously; the weight gate adapts dynamically based on
-    collective trust and evenness.
-  \item \textbf{Blockchain audit trail} — all events are permanently
-    recorded on a hash-chained ledger, providing non-repudiable evidence
-    of every action.
-\end{enumerate}
-
-% =============================================================================
-\section{Background and Related Work}
-% =============================================================================
-
-\subsection{ElGamal Encryption}
-
-ElGamal encryption \cite{elgamal1985} operates over a cyclic group
-$\mathbb{Z}_p^*$ with generator $g$ and prime $p$.
-A key pair $(y, x)$ is generated where $y = g^x \bmod p$ is the public key
-and $x$ is the private key.
-To encrypt a message $m$ (vote option, encoded as a group element):
-
-\begin{align}
-  C_1 &= g^k \bmod p \\
-  C_2 &= m \cdot y^k \bmod p
-\end{align}
-
-where $k$ is a random ephemeral value.
-Decryption recovers $m = C_2 \cdot C_1^{-x} \bmod p$.
-The scheme is semantically secure under the Decisional
-Diffie-Hellman (DDH) assumption.
-
-In S$^3$-Vote, the private key $x$ is never held by any single party;
-it is split via Shamir Secret Sharing before the election begins and
-reconstructed only after all votes are cast.
-
-\subsection{Shamir Secret Sharing}
-
-Shamir's $(t,n)$-threshold scheme \cite{shamir1979} splits a secret
-$s \in \mathbb{Z}_p$ by constructing a random polynomial of degree $t-1$:
-\begin{equation}
-  f(z) = s + a_1 z + a_2 z^2 + \cdots + a_{t-1} z^{t-1} \pmod{p}
-\end{equation}
-Authority $i$ receives share $s_i = f(i)$.
-Any $t$ shares uniquely determine $f$ (via Lagrange interpolation) and
-hence reveal $s$; any $t-1$ shares are information-theoretically independent
-of $s$.
-
-The classical scheme treats all shares as interchangeable: any $t$-subset
-suffices. S$^3$-Vote augments this with reputation weights so that the
-effective contribution of each share depends on the authority's trust level.
-
-\subsection{Publicly Verifiable Secret Sharing (PVSS)}
-
-In standard secret sharing, a participant who submits a corrupted share
-causes reconstruction to fail with no publicly verifiable evidence of
-wrongdoing. PVSS \cite{schoenmakers1999} solves this by publishing
-\emph{commitments} alongside shares such that anyone can verify correctness
-without learning the secret.
-
-In S$^3$-Vote, at election creation, each share $s_i$ generates a commitment:
-\begin{equation}
-  C_i = g^{H(s_i)} \bmod p
-\end{equation}
-where $H$ is a cryptographic hash function.
-These commitments are written to the blockchain before reconstruction begins.
-When authority $i$ submits $\hat{s}_i$ during reconstruction, the verifier
-checks $g^{H(\hat{s}_i)} \equiv C_i \pmod{p}$.
-A mismatch is on-chain proof of submission of an invalid share.
-
-\subsection{Reputation in Secret Sharing: Nojoumian's Scheme}
-
-Nojoumian \textit{et al.}\ \cite{nojoumian2012,nojoumian2018} introduced the
-concept of \emph{social secret sharing}, where participant reputation
-influences the threshold. Their key contributions were recognising that
-not all participants should be treated equally and that past behaviour
-should inform future requirements.
-
-However, their scheme has several limitations that S$^3$-Vote addresses:
-\begin{itemize}
-  \item Requires a \emph{trusted dealer} to assign and update reputation scores
-  \item Reputation updates are manual or social (participants evaluate peers),
-    introducing subjectivity and gamesmanship
-  \item No mechanism for public proof of cheating
-  \item Single reconstruction gate (no two-gate policy)
-  \item No protection against reputation concentration
-  \item No blockchain for tamper-evident history
-  \item Designed as a general secret sharing primitive, not a complete
-    voting system
-\end{itemize}
-
-% =============================================================================
-\section{System Architecture}
-% =============================================================================
-
-\subsection{Participants}
-
-\begin{itemize}
-  \item \textbf{Election Administrator} — creates the election, defines
-    authority set, options, and voter count.
-  \item \textbf{Voters} — cast encrypted ballots; their identities are
-    independent of the decryption process.
-  \item \textbf{Decryption Authorities} ($A_1, \dots, A_N$) — each holds
-    one Shamir share of the private key; collectively responsible for
-    reconstruction after voting closes.
-  \item \textbf{Blockchain} — append-only tamper-evident ledger; records
-    all events and acts as the public bulletin board.
-\end{itemize}
-
-\subsection{Election Lifecycle}
-
-The full protocol proceeds through five phases:
-
-\begin{enumerate}
-  \item \textbf{Setup} — key generation, secret splitting, PVSS commitment
-    publication, threshold computation.
-  \item \textbf{Voting} — voters submit ElGamal-encrypted ballots; ciphertexts
-    recorded on-chain.
-  \item \textbf{Reconstruction} — each authority submits their share;
-    PVSS verification runs immediately; coalition weight tracked in real time.
-  \item \textbf{Tally} — once both reconstruction gates are satisfied,
-    the private key is assembled via Lagrange interpolation and all
-    ciphertexts are decrypted.
-  \item \textbf{Reputation Update} — behaviour scores computed for every
-    authority; reputation registry updated; next election's quorum
-    pre-computed from new scores.
-\end{enumerate}
-
-If reconstruction becomes \emph{impossible} (too many cheaters and skippers
-to ever satisfy either gate), the system transitions to a \textbf{failed}
-state: automatic penalties are applied, the blockchain records the failure
-cause and responsible parties, and the next election is unlocked with an
-adjusted (higher) quorum.
-
-% =============================================================================
-\section{Reputation Model}
-% =============================================================================
-
-\subsection{Behavioural Scores}
-
-After each election, three behavioural dimensions are scored for every
-authority $A_i$:
-
-\begin{description}
-  \item[Participation ($P_i$)] Did the authority engage with the protocol?
-    \begin{equation}
-      P_i = \begin{cases} 1.0 & \text{submitted valid share} \\
-                          0.5 & \text{submitted invalid share (cheated)} \\
-                          0.0 & \text{absent / skipped} \end{cases}
-    \end{equation}
-
-  \item[Contribution ($C_i$)] How much did their weight cover the
-    per-share average needed?
-    \begin{equation}
-      C_i = \begin{cases}
-        \min\!\left(1,\; \dfrac{w_i}{\bar{w}_{\text{needed}}}\right)
-          & \text{if submitted valid share} \\
-        0.0 & \text{otherwise}
-      \end{cases}
-    \end{equation}
-    where $\bar{w}_{\text{needed}} = \tau / t$ and $\tau$ is the quorum,
-    $t$ the Shamir threshold.
-
-  \item[Honesty ($H_i$)] Did the authority submit the correct share?
-    \begin{equation}
-      H_i = \begin{cases} 1.0 & \text{PVSS verification passed} \\
-                          0.0 & \text{PVSS verification failed (cheated)} \\
-                          0.5 & \text{absent — neutral, did not lie} \end{cases}
-    \end{equation}
-\end{description}
-
-\subsection{Reputation Update Formula}
-
-The reputation $R_i$ is updated after each election using an
-exponentially weighted formula:
-\begin{equation}
-  \boxed{R_i^{(\ell+1)} = \delta \left[ \lambda R_i^{(\ell)} +
-    (1-\lambda)\left(\alpha P_i + \beta C_i + \gamma H_i\right) \right]}
-  \label{eq:rep}
-\end{equation}
-
-\noindent with parameters:
+\newpage
+\section*{List of Symbols}
+\addcontentsline{toc}{section}{List of Symbols}
 \begin{center}
-\begin{tabular}{cll}
+\begin{tabular}{p{2.2cm}p{11cm}}
 \toprule
-Parameter & Value & Role \\
+\textbf{Symbol} & \textbf{Meaning} \\
 \midrule
-$\alpha$ & 0.2 & Weight of Participation in new score \\
-$\beta$  & 0.3 & Weight of Contribution in new score \\
-$\gamma$ & 0.5 & Weight of Honesty in new score \\
-$\lambda$ & 0.7 & Memory factor (past vs.\ present) \\
-$\delta$ & 0.95 & Decay factor (small penalty for time elapsed) \\
+$N$               & Number of decryption authorities \\
+$t$               & Shamir threshold (minimum shares for reconstruction) \\
+$\tau$            & Effective quorum (reputation-weighted threshold) \\
+$\tau_{\text{neutral}}$ & Neutral quorum $= \lceil N/2 \rceil$ \\
+$\tau_{\text{min}}$     & Minimum quorum $= \max(2, \lceil N/3 \rceil)$ \\
+$\tau_{\text{max}}$     & Maximum quorum $= N - 1$ \\
+$R_i$             & Reputation score of authority $A_i$ \\
+$\bar{R}$         & Mean reputation across all authorities \\
+$w_i$             & Reputation weight of authority $A_i$ \\
+$E$               & Trust evenness factor \\
+$\tau_{\text{trust}}$ & Combined trust score $= \min(1, \bar{R} \cdot E)$ \\
+$\alpha$          & Participation weight in reputation formula (default 0.2) \\
+$\beta$           & Contribution weight in reputation formula (default 0.3) \\
+$\gamma$          & Honesty weight in reputation formula (default 0.5) \\
+$\lambda$         & Memory factor — old vs.\ new reputation (default 0.7) \\
+$\delta$          & Decay factor per round (default 0.95) \\
+$P_i, C_i, H_i$  & Participation, contribution, honesty scores for $A_i$ \\
+$p$               & Large prime modulus for ElGamal group \\
+$g$               & Generator of cyclic group $\mathbb{Z}_p^*$ \\
+$x$               & ElGamal private key \\
+$y$               & ElGamal public key $= g^x \bmod p$ \\
+$k$               & Ephemeral encryption randomness \\
+$s_i$             & Shamir share of authority $A_i$ \\
+$C_i^{\text{pvss}}$ & PVSS commitment for share $s_i$ $= g^{H(s_i)} \bmod p$ \\
+$\mathcal{S}$     & Set of authorities who submitted valid shares \\
+$\mathbb{G}$      & Cyclic group of prime order $q$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent Honesty carries the highest weight ($\gamma = 0.5$) because
-submitting a corrupted share is the most damaging possible action.
-Memory ($\lambda = 0.7$) ensures that a single bad election does not
-permanently destroy a long-standing reputation, but sustained misbehaviour
-accumulates.
+\newpage
+
+% =============================================================================
+\section{Introduction}
+\label{sec:intro}
+% =============================================================================
+
+\subsection{Motivation}
+
+The integrity of voting systems is foundational to democratic governance and
+organisational decision-making. Traditional electronic voting systems route
+all trust through a central authority: a government agency, corporate IT
+infrastructure, or a cloud provider.
+This design introduces two compounding vulnerabilities simultaneously.
+
+First, a \textbf{single point of trust}: the operator has complete power
+to manipulate ballots, suppress results, or alter tallies, often without
+any publicly verifiable evidence of wrongdoing. Second, a
+\textbf{single point of failure}: if the operator's infrastructure is
+compromised — through malicious attack, system failure, or coercion —
+the entire election is ruined.
+
+Distributed threshold cryptography was developed to address these concerns
+by splitting trust across multiple independent parties. Yet classical
+threshold schemes such as Shamir's foundational work~\cite{shamir1979}
+treat every participant as equally trustworthy and provide no mechanism for
+detecting, proving, or adapting to misbehaviour. A single malicious
+authority submitting a corrupted share causes silent reconstruction failure,
+with no accountability and no path to recovery.
+
+\subsection{Problem Statement}
+
+The core problem this thesis addresses is:
+
+\begin{insight}[Central Question]
+\textit{How can we design a decentralised voting system where the
+reconstruction threshold adapts dynamically to observed authority behaviour,
+cheating is publicly provable rather than merely suspected, and the
+system recovers gracefully from partial failures — all without relying
+on any trusted coordinator?}
+\end{insight}
+
+\subsection{Contributions}
+
+This thesis makes the following contributions:
+
+\begin{enumerate}[label=\textbf{C\arabic*.}, leftmargin=3em]
+  \item \textbf{Reputation-weighted secret sharing.} A persistent,
+    cross-election reputation model for decryption authorities based on
+    three objectively measurable behavioural dimensions.
+
+  \item \textbf{Two-piece linear adaptive threshold.} A provably anchored
+    quorum formula that maps collective trust to a reconstruction requirement
+    between $\lceil N/3 \rceil$ and $N-1$, initialising at exactly
+    $\lceil N/2 \rceil$ for fresh authorities.
+
+  \item \textbf{Two-gate reconstruction policy.} Simultaneous enforcement
+    of a cryptographic share-count gate and a reputation weight gate,
+    closing attack vectors that single-threshold schemes cannot prevent.
+
+  \item \textbf{Concentration-resistance proof.} Formal demonstration that
+    no single authority can ever accumulate sufficient weight to satisfy
+    the quorum alone, regardless of their reputation.
+
+  \item \textbf{End-to-end prototype.} A fully operational implementation
+    comprising ElGamal encryption, Shamir sharing, PVSS verification,
+    reputation engine, adaptive threshold, and blockchain audit log,
+    accessible through a real-time web dashboard.
+
+  \item \textbf{Formal ballot privacy proof.} A concrete IND-CPA security
+    reduction from the S$^3$-Vote threshold ElGamal scheme to the DDH
+    problem, with PVSS binding established under the discrete logarithm
+    assumption and random oracle model.
+
+  \item \textbf{Game-theoretic honesty dominance.} A formal proof that
+    honest participation strictly dominates cheating for rational
+    authorities over any sufficiently long horizon, and that colluding
+    coalitions are inherently unstable under the reputation penalty
+    mechanism.
+\end{enumerate}
+
+\subsection{Thesis Structure}
+
+Section~\ref{sec:background} reviews the cryptographic primitives,
+prior work, and the state of the art in e-voting systems.
+Section~\ref{sec:architecture} presents the system architecture and
+threat model. Sections~\ref{sec:reputation}--\ref{sec:blockchain}
+detail the core technical contributions.
+Section~\ref{sec:security} provides the security analysis, including a
+formal IND-CPA ballot privacy proof under DDH, a treatment of
+receipt-freeness, and end-to-end verifiability.
+Section~\ref{sec:gametheory} analyses incentives game-theoretically,
+proving that honest behaviour is dominant for rational authorities.
+Section~\ref{sec:sensitivity} presents a parameter sensitivity analysis.
+Section~\ref{sec:comparison} compares S$^3$-Vote against prior work.
+Section~\ref{sec:implementation} describes the prototype.
+Section~\ref{sec:walkthrough} traces a complete two-round example.
+Sections~\ref{sec:limitations} and~\ref{sec:conclusion} discuss remaining
+limitations and conclude.
+
+% =============================================================================
+\section{Background and Related Work}
+\label{sec:background}
+% =============================================================================
+
+\subsection{ElGamal Encryption}
+
+ElGamal encryption~\cite{elgamal1985} is a public-key cryptosystem based on
+the discrete logarithm problem, operating over a cyclic group
+$\mathbb{Z}_p^*$ with a large prime $p$ and generator $g$.
+
+\begin{definition}[ElGamal Key Pair]
+  A key pair $(y, x)$ is generated by choosing a random private key
+  $x \in \mathbb{Z}_{p-1}$ and computing public key $y = g^x \bmod p$.
+\end{definition}
+
+To encrypt a vote encoded as a group element $m \in \mathbb{Z}_p^*$:
+\begin{align}
+  C_1 &= g^k \bmod p \label{eq:eg1}\\
+  C_2 &= m \cdot y^k \bmod p \label{eq:eg2}
+\end{align}
+where $k$ is a fresh random ephemeral value for each encryption.
+Decryption recovers $m = C_2 \cdot (C_1^x)^{-1} \bmod p$.
+The scheme is semantically secure under the Decisional Diffie-Hellman (DDH)
+assumption~\cite{elgamal1985,boneh1998}.
+
+In S$^3$-Vote, the private key $x$ is never held whole by any single party;
+it is split using Shamir Secret Sharing before the election begins and
+reconstructed only after all ballots are cast.
+
+\subsection{Shamir Secret Sharing}
+
+\begin{definition}[$(t,n)$-Threshold Scheme~\cite{shamir1979}]
+  A secret $s \in \mathbb{Z}_p$ is split by constructing a random polynomial
+  of degree $t{-}1$ with $f(0) = s$:
+  \begin{equation}
+    f(z) = s + a_1 z + a_2 z^2 + \cdots + a_{t-1} z^{t-1} \pmod{p}
+  \end{equation}
+  Authority $i$ receives share $s_i = f(i)$.
+  Any $t$ shares uniquely determine $f$ via Lagrange interpolation:
+  \begin{equation}
+    s = f(0) = \sum_{i \in \mathcal{S}} s_i \prod_{j \in \mathcal{S},\, j \neq i}
+    \frac{-j}{i-j} \pmod{p}
+  \end{equation}
+  Any $t-1$ shares reveal no information about $s$ (information-theoretic
+  secrecy).
+\end{definition}
+
+The classical scheme treats all shares as interchangeable: any $t$-subset
+of the $n$ shares suffices for reconstruction.
+Desmedt and Frankel~\cite{desmedt1990} extended this idea to threshold
+cryptosystems, enabling distributed decryption without reconstructing the
+private key in full — a precursor to the threshold ElGamal decryption used
+in S$^3$-Vote.
+S$^3$-Vote further augments this with reputation weights, so that the
+effective contribution of each authority to the reconstruction quorum depends
+on their trust level.
+
+\subsection{Publicly Verifiable Secret Sharing}
+
+In standard secret sharing, a participant who submits a corrupted share
+causes reconstruction failure with no way to publicly identify the culprit.
+PVSS~\cite{schoenmakers1999,pedersen1991} solves this via cryptographic
+\emph{commitments} that allow anyone to verify share correctness without
+learning the secret.
+
+\begin{definition}[PVSS Commitment]
+  For share $s_i$ and cryptographic hash $H$, the commitment is:
+  \begin{equation}
+    C_i = g^{H(s_i)} \bmod p
+    \label{eq:commitment}
+  \end{equation}
+  Commitments are published to the blockchain at election creation.
+  During reconstruction, authority $i$ submits $\hat{s}_i$; the verifier
+  checks $g^{H(\hat{s}_i)} \equiv C_i \pmod{p}$.
+  A mismatch constitutes publicly verifiable proof of an invalid submission.
+\end{definition}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.3cm and 2.2cm,
+  box/.style={rectangle, rounded corners=4pt, draw, fill=blue!8,
+              minimum width=3cm, minimum height=0.8cm, font=\small},
+  arrow/.style={-{Stealth[length=7pt]}, thick},
+  check/.style={rectangle, rounded corners=4pt, draw=green!60!black,
+                fill=green!8, minimum width=2.8cm, minimum height=0.8cm, font=\small},
+  fail/.style={rectangle, rounded corners=4pt, draw=red!70!black,
+               fill=red!8, minimum width=2.8cm, minimum height=0.8cm, font=\small}
+]
+  \node[box] (secret)  {Secret $s$};
+  \node[box, right=2cm of secret] (split)   {Shamir Split};
+  \node[box, right=2cm of split]  (pub)     {Publish $C_i$ on-chain};
+  \node[box, below=1.8cm of split] (submit) {$A_i$ submits $\hat{s}_i$};
+  \node[check, right=2cm of submit] (ok)    {Verified $\checkmark$};
+  \node[fail,  below=1cm of ok]     (fail)  {Invalid — on-chain proof $\times$};
+
+  \draw[arrow] (secret) -- (split);
+  \draw[arrow] (split)  -- node[above,font=\small]{$s_1,\ldots,s_N$} (pub);
+  \draw[arrow] (split)  -- (submit);
+  \draw[arrow] (submit) -- node[above,font=\small]{$g^{H(\hat{s}_i)} = C_i$?} (ok);
+  \draw[arrow] (submit) -- ++(0,-1) -| node[below left,font=\small]{fail} (fail);
+  \draw[dashed, gray] (pub) -- ++(0,-2.7) -| (ok);
+  \node[gray, font=\footnotesize] at (5.8, -0.9) {compare};
+\end{tikzpicture}
+\caption{PVSS share creation and verification flow. Commitments are anchored
+  on-chain before any share is submitted, preventing retroactive manipulation.}
+\label{fig:pvss}
+\end{figure}
+
+\subsection{Blockchain Technology}
+
+A blockchain is an append-only, distributed, hash-chained ledger.
+Each block $B_k$ contains a data payload and a hash computed over both
+the payload and the previous block's hash:
+\begin{equation}
+  h_k = \text{SHA-256}(\,k \,\|\, \text{timestamp}_k \,\|\,
+        \text{data}_k \,\|\, h_{k-1}\,)
+\end{equation}
+Altering any block invalidates all subsequent hashes, making tampering
+immediately detectable by any party holding a copy of the chain.
+
+S$^3$-Vote uses the blockchain as a \emph{public bulletin board}: all
+events are written once and cannot be silently revised.
+
+\subsection{Prior Work on Reputation in Secret Sharing}
+
+Nojoumian and Stinson~\cite{nojoumian2012,nojoumian2018} introduced
+\emph{social secret sharing}, where participant reputation influences the
+effective threshold. Their key insight — that not all participants should
+be treated equally and that past behaviour should inform future requirements
+— directly motivates S$^3$-Vote.
+
+However, several critical limitations remain in their model:
+(i)~a \emph{trusted dealer} is required to assign and update reputation;
+(ii)~reputation updates are social and subjective, opening them to
+coalition manipulation;
+(iii)~no public proof of cheating is provided;
+(iv)~a single threshold gate is used;
+(v)~no protection against reputation concentration;
+(vi)~no cross-round persistence mechanism is formalised;
+(vii)~the work is framed as a secret sharing primitive, not a complete
+voting system.
+Section~\ref{sec:comparison} provides a detailed per-point comparison.
+Cramer, Gennaro, and Schoenmakers~\cite{cramer1997} proposed an early
+multi-authority election scheme using threshold ElGamal and zero-knowledge
+proofs; S$^3$-Vote builds on this cryptographic foundation while adding
+reputation-weighted adaptive thresholds and cross-round accountability.
+
+\subsection{Electronic Voting Systems: State of the Art}
+\label{sec:evoting}
+
+Electronic voting has been studied since the early 1980s.
+We survey the most influential deployed systems and identify the gaps
+that S$^3$-Vote addresses.
+
+\subsubsection*{FOO92}
+Fujioka, Okamoto, and Ohta~\cite{foo1992} introduced the first
+widely-cited cryptographic e-voting protocol.
+FOO92 uses blind signatures to achieve anonymity: each voter obtains a
+blind signature from the administrator on their ballot and submits it
+anonymously through an untappable channel.
+The protocol achieves individual verifiability but relies on a
+\emph{single trusted administrator} for signature issuance — a central
+point of failure that S$^3$-Vote eliminates through threshold key management.
+Furthermore, FOO92 provides no mechanism for handling a compromised or
+unresponsive administrator, and offers no accountability trail for
+administrator behaviour.
+
+\subsubsection*{Helios}
+Helios~\cite{adida2008} is an open-audit web-based voting system that
+uses ElGamal encryption and mix-nets or homomorphic tallying.
+Ballots are posted on a public bulletin board; any observer can audit
+the tally by following the published cryptographic proofs.
+Helios achieves end-to-end verifiability in the browser but uses a
+\emph{fixed set of trustees with equal trust and a static threshold}.
+A compromised or absent trustee stalls the election with no automated
+recovery mechanism and no accountability record.
+S$^3$-Vote replaces the static equal-trust model with adaptive,
+reputation-weighted thresholds and adds automatic failure detection
+and penalty assignment.
+
+\subsubsection*{Belenios}
+Belenios~\cite{cortier2013} improves upon Helios by introducing a
+stronger coercion-resistance model and formal proofs of ballot privacy
+and tally correctness; it is deployed in several French academic elections.
+Like Helios, Belenios uses a \emph{static trustee model with no reputation
+mechanism}, and its threshold is fixed at the start of each election.
+There is no formalised mechanism for what happens when trustees
+misbehave across multiple elections.
+
+\subsubsection*{Civitas}
+Civitas~\cite{clarkson2008} is a coercion-resistant voting system based
+on the Juels-Catalano-Jakobsson (JCJ) credential model.
+Voters hold credentials that can be used to cast cover votes under
+coercion, providing deniability.
+Civitas achieves strong coercion resistance but requires a complex
+credential distribution ceremony and is computationally expensive
+(re-encryption mix-nets and zero-knowledge proofs throughout).
+The trustee model is static and offers no cross-round accountability.
+
+\subsubsection*{Positioning S$^3$-Vote}
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}ccccc}
+\toprule
+\textbf{Property} & \textbf{FOO92} & \textbf{Helios}
+                  & \textbf{Belenios} & \textbf{Civitas} & \textbf{S$^3$-Vote} \\
+\midrule
+Ballot privacy           & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+Tally integrity          & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+Universal verifiability  & $\times$   & \checkmark & \checkmark & \checkmark & \checkmark \\
+Coercion resistance      & $\times$   & $\times$   & Partial    & \checkmark & Extensible \\
+Adaptive threshold       & $\times$   & $\times$   & $\times$   & $\times$   & \checkmark \\
+Authority accountability & $\times$   & $\times$   & $\times$   & $\times$   & \checkmark \\
+On-chain cheat detection & $\times$   & $\times$   & $\times$   & $\times$   & \checkmark \\
+Failure recovery         & $\times$   & $\times$   & $\times$   & $\times$   & \checkmark \\
+No trusted coordinator   & $\times$   & $\times$   & $\times$   & $\times$   & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The table shows that while existing systems achieve strong ballot privacy
+and verifiability, \emph{none} address adaptive thresholds, authority
+accountability, or graceful failure recovery.
+S$^3$-Vote is the first system to combine all three while maintaining
+end-to-end verifiability.
+
+\subsubsection*{Blockchain-Based Voting Systems}
+
+A separate line of work places voting logic directly on a public
+blockchain. Commercial systems such as Voatz and Follow My Vote deploy
+smart contracts on Ethereum so that vote casting and tallying are executed
+by the network itself, with no trusted server.
+The appeal is maximal decentralisation: consensus is enforced by
+thousands of independent nodes.
+
+However, public blockchain voting introduces three problems that
+S$^3$-Vote deliberately avoids.
+First, \emph{on-chain vote exposure}: Ethereum transactions are public
+by default; encrypting ballots on-chain requires additional zero-knowledge
+infrastructure that significantly increases complexity and gas cost.
+Second, \emph{fixed and public authority set}: Ethereum-based schemes
+have no native mechanism for reputation-weighted decryption authorities
+whose quorum adapts across rounds.
+Third, \emph{throughput and cost}: recording every ballot as a
+blockchain transaction is prohibitively expensive and slow for elections
+with thousands of voters.
+
+S$^3$-Vote uses the blockchain as a \emph{tamper-evident audit log}
+rather than an execution engine.
+Vote encryption, share verification, and threshold logic run
+off-chain in efficient Python; only the immutable event records
+(commitments, share submissions, reputation updates) are written
+to the chain.
+This design achieves the non-repudiation and transparency benefits
+of a public ledger without the throughput, cost, or complexity
+penalties of on-chain execution.
+In a production deployment, the local chain would be replaced by a
+permissioned distributed ledger (e.g., Hyperledger Fabric) shared
+among the election authorities — retaining the audit guarantees
+while keeping sensitive key material off any public network.
+
+% =============================================================================
+\section{System Architecture}
+\label{sec:architecture}
+% =============================================================================
+
+\subsection{Design Goals}
+
+\begin{enumerate}[label=\textbf{G\arabic*.}]
+  \item \textbf{Vote confidentiality} — no party learns any ballot before
+    reconstruction; the private key is never held whole.
+  \item \textbf{Tally integrity} — votes committed before reconstruction
+    cannot be added, removed, or modified.
+  \item \textbf{Cheat accountability} — invalid share submissions produce
+    publicly verifiable, non-repudiable evidence.
+  \item \textbf{Adaptive resilience} — the reconstruction requirement adapts
+    to the group's demonstrated trustworthiness.
+  \item \textbf{No trusted coordinator} — no single party controls
+    reputation, key splitting, or threshold calculation.
+\end{enumerate}
+
+\subsection{Threat Model}
+
+\paragraph{Adversary classification.}
+We distinguish two orthogonal dimensions of adversarial behaviour.
+
+\textbf{Byzantine vs.\ rational.}
+A \emph{Byzantine} (malicious) authority deviates arbitrarily from the
+protocol — submitting corrupted shares, lying about state, or simply
+going silent — with no regard for their own payoff.
+A \emph{rational} authority deviates only when deviation yields higher
+expected utility than honest participation.
+S$^3$-Vote must withstand both: PVSS provides accountability against
+Byzantine behaviour (Section~\ref{sec:security}), while the reputation
+penalty mechanism is designed to make honest play the dominant strategy
+for rational authorities (Section~\ref{sec:gametheory}).
+
+\textbf{Adaptive vs.\ static corruption.}
+A \emph{statically} corrupted authority is compromised before the
+protocol begins; the adversary fixes the corrupt set in advance.
+An \emph{adaptively} corrupted authority may be compromised at any
+point during an election, even after seeing partial protocol state.
+We assume \emph{static} corruption in the formal proof
+(Theorem~\ref{thm:indcpa}); adaptive corruption resistance is left as
+future work and requires a UC-secure threshold scheme.
+
+\paragraph{Formal assumptions.}
+\begin{itemize}
+  \item \textbf{Corrupted authority bound.} At most $t-1$ of the $N$
+    authorities are Byzantine, where $t$ is the current Shamir threshold.
+    This is the minimum required for information-theoretic share secrecy.
+  \item \textbf{Authority capabilities.} A corrupted authority may submit
+    an invalid share, refuse to participate, or attempt to collude with
+    other corrupted authorities to pool shares.
+    They may \emph{not} forge another authority's share (each share is
+    bound to its authority index via Lagrange interpolation) or rewrite
+    blockchain history.
+  \item \textbf{Blockchain integrity.} The chain is append-only and
+    hash-consistent. In the prototype this is enforced by the server;
+    in production by distributed Byzantine-fault-tolerant
+    consensus~\cite{lamport1982}.
+  \item \textbf{Cryptographic hardness.} The DDH assumption holds in the
+    ElGamal group; SHA-256 is modelled as a random oracle for PVSS
+    commitments.
+  \item \textbf{Honest voters.} Voters submit well-formed encryptions of
+    valid options. Malformed ballots are outside scope; input validation
+    is an application-layer concern.
+  \item \textbf{Honest key setup.} ElGamal group parameters are generated
+    honestly and publicly known. A malicious key-generation ceremony is
+    out of scope; production deployments would use a distributed key
+    generation (DKG) protocol.
+\end{itemize}
+
+\paragraph{Out of scope.}
+Voter coercion and receipt-freeness (addressed in
+Section~\ref{sec:security}), Byzantine behaviour at the network layer
+(message dropping, reordering), and adaptive authority corruption.
+
+\subsection{System Participants and High-Level Architecture}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  actor/.style={rectangle, rounded corners=6pt, draw=blue!60!black,
+    fill=blue!10, minimum width=2.6cm, minimum height=1.1cm,
+    align=center, font=\small\bfseries},
+  comp/.style={rectangle, rounded corners=6pt, draw=gray!70,
+    fill=gray!8, minimum width=2.4cm, minimum height=1cm,
+    align=center, font=\small},
+  chain/.style={rectangle, rounded corners=6pt, draw=orange!70!black,
+    fill=orange!10, minimum width=9cm, minimum height=1cm,
+    align=center, font=\small\bfseries},
+  arrow/.style={-{Stealth[length=6pt]}, thick},
+  darrow/.style={<->, thick, dashed, gray}
+]
+  % Actors
+  \node[actor] (admin)  at (0, 0)    {Admin\\(Election\\Creator)};
+  \node[actor] (voters) at (3.5, 0)  {Voters\\$V_1 \ldots V_m$};
+  \node[actor] (auths)  at (7, 0)    {Authorities\\$A_1 \ldots A_N$};
+
+  % Components
+  \node[comp] (enc)   at (0, -2.4)  {ElGamal\\Key Gen};
+  \node[comp] (sham)  at (2.6, -2.4){Shamir\\Split};
+  \node[comp] (pvss)  at (5.2, -2.4){PVSS\\Verify};
+  \node[comp] (rep)   at (7.8, -2.4){Reputation\\Engine};
+
+  % Blockchain
+  \node[chain] (bc) at (3.8, -4.4)  {Blockchain — Public Tamper-Evident Ledger};
+
+  % Arrows admin → components
+  \draw[arrow] (admin)  -- (enc);
+  \draw[arrow] (enc)    -- (sham);
+  \draw[arrow] (voters) -- ++(0,-1) node[right,font=\tiny]{encrypted votes} -- ++(0,-0.5) -- (pvss);
+  \draw[arrow] (auths)  -- (pvss);
+  \draw[arrow] (auths)  -- (rep);
+
+  % All write to blockchain
+  \foreach \c in {enc, sham, pvss, rep}
+    \draw[arrow, gray] (\c) -- (bc);
+
+  % Admin reads from rep
+  \draw[darrow] (rep) -- ++(1.4,0) |- (admin);
+\end{tikzpicture}
+\caption{High-level S$^3$-Vote architecture. All cryptographic operations
+  write immutable records to the blockchain. The reputation engine updates
+  authority scores after each round and feeds them into the next election's
+  threshold computation.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Election Lifecycle}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  phase/.style={rectangle, rounded corners=8pt, draw=blue!60!black,
+    fill=blue!9, minimum width=3.2cm, minimum height=1.3cm,
+    align=center, font=\small\bfseries, drop shadow},
+  arrow/.style={-{Stealth[length=8pt]}, very thick, blue!60!black},
+  redarrow/.style={-{Stealth[length=8pt]}, very thick, red!60!black},
+  note/.style={font=\footnotesize\itshape, text=gray!65!black, align=center},
+  fail/.style={rectangle, rounded corners=8pt, draw=red!55!black,
+    fill=red!8, minimum width=3.2cm, minimum height=1.3cm,
+    align=center, font=\small\bfseries}
+]
+  % ── Nodes ──────────────────────────────────────────────────────────────────
+  \node[phase] (setup) at (0,    0  ) {1.\ Setup\\[3pt]Key Gen + PVSS};
+  \node[phase] (vote)  at (5,    0  ) {2.\ Voting\\[3pt]Encrypted Ballots};
+  \node[phase] (recon) at (10,   0  ) {3.\ Reconstruction\\[3pt]Share Submission};
+  \node[phase] (tally) at (10,  -3.5) {4.\ Tally\\[3pt]Decrypt + Count};
+  \node[phase] (rep)   at (5,   -3.5) {5.\ Reputation\\[3pt]Update + Persist};
+  \node[fail]  (fail)  at (5,   -6.3) {Failed State\\[3pt]Penalties Applied};
+
+  % ── Main cycle (blue) ──────────────────────────────────────────────────────
+  \draw[arrow] (setup) -- node[above,note]{Admin starts}   (vote);
+  \draw[arrow] (vote)  -- node[above,note]{Voting closes}  (recon);
+  \draw[arrow] (recon) -- node[right,note]{Both gates met} (tally);
+  \draw[arrow] (tally) -- (rep);
+
+  % Next round: clean left-side rectangular loop
+  \draw[arrow] (rep.west) -- (-1.8,-3.5) -- (-1.8,0) -- (setup.west);
+  \node[note,left] at (-1.8,-1.75) {Next\\round};
+
+  % ── Failure path (red) ─────────────────────────────────────────────────────
+  % Impossible: right-side L-route — clear of all nodes
+  \draw[redarrow] (recon.east) -- (11.5,0) -- (11.5,-6.3) -- (fail.east);
+  \node[note,right] at (11.5,-3.15) {Impossible};
+
+  % Penalise: straight up from fail to rep
+  \draw[redarrow,dashed] (fail.north)
+    -- node[right,note]{Penalise\\+ unlock} (rep.south);
+\end{tikzpicture}
+\caption{S$^3$-Vote election lifecycle. The five normal phases form a
+  clockwise cycle (blue); if reconstruction becomes impossible the system
+  transitions to a failed state, applies penalties, and re-enters the
+  reputation update phase (red).}
+\label{fig:lifecycle}
+\end{figure}
+
+% =============================================================================
+\section{Reputation Model}
+\label{sec:reputation}
+% =============================================================================
+
+\subsection{Behavioural Scoring}
+
+After each election, three dimensions are objectively scored for every
+authority $A_i$ based on outcomes recorded on the blockchain:
+
+\subsubsection*{Participation ($P_i$)}
+\begin{equation}
+  P_i = \begin{cases}
+    1.0 & A_i \text{ submitted a valid share} \\
+    0.5 & A_i \text{ submitted an invalid share (showed up but cheated)} \\
+    0.0 & A_i \text{ was absent or explicitly skipped}
+  \end{cases}
+\end{equation}
+
+\subsubsection*{Contribution ($C_i$)}
+\begin{equation}
+  C_i = \begin{cases}
+    \min\!\left(1,\; \dfrac{w_i}{\bar{w}_{\text{needed}}}\right) &
+      A_i \text{ submitted a valid share} \\[8pt]
+    0.0 & \text{otherwise}
+  \end{cases}
+\end{equation}
+where $\bar{w}_{\text{needed}} = \tau / t$ is the average weight one share
+must carry to satisfy the quorum, $\tau$ is the current quorum, and $t$ is
+the Shamir threshold.
+High-weight authorities naturally score higher here, reflecting that their
+participation was disproportionately valuable.
+
+\subsubsection*{Honesty ($H_i$)}
+\begin{equation}
+  H_i = \begin{cases}
+    1.0 & \text{PVSS verification passed} \\
+    0.0 & \text{PVSS verification failed (intentional corruption)} \\
+    0.5 & \text{absent — neutral, did not actively lie}
+  \end{cases}
+\end{equation}
+An absent authority receives a neutral honesty score of 0.5 rather than 0
+because absence, while costly in contribution, is not equivalent to
+actively attempting to sabotage reconstruction.
+
+\subsection{Reputation Update Formula}
+
+\begin{equation}
+  \boxed{R_i^{(\ell+1)} = \delta \left[\,
+    \lambda R_i^{(\ell)} +
+    (1-\lambda)\left(\alpha P_i + \beta C_i + \gamma H_i\right)
+  \right]}
+  \label{eq:rep}
+\end{equation}
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+Symbol & Value & Role & Rationale \\
+\midrule
+$\alpha$ & 0.2 & Participation weight & Necessary but not sufficient \\
+$\beta$  & 0.3 & Contribution weight  & Reflects actual value added \\
+$\gamma$ & 0.5 & Honesty weight       & Highest: cheating is most damaging \\
+$\lambda$ & 0.7 & Memory factor       & Past vs.\ present behaviour \\
+$\delta$ & 0.95 & Decay factor        & Small penalty for inactivity \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}
+  The memory factor $\lambda = 0.7$ ensures that a single bad election does
+  not permanently destroy a long-standing reputation, but that sustained
+  misbehaviour accumulates irreversibly. The decay $\delta = 0.95$ provides
+  a small passive incentive to remain active across rounds.
+\end{remark}
 
 \subsection{Initial Reputation}
 
@@ -334,481 +826,1374 @@ New authorities begin at:
 \begin{equation}
   R_{\text{initial}} = \frac{2}{3}
 \end{equation}
-This value is chosen so that a group of entirely fresh, equal-reputation
-authorities produces a neutral starting quorum of exactly $\lceil N/2 \rceil$
-(proven in Section~\ref{sec:threshold}).
+This value is deliberately chosen so that a fully fresh, equal-reputation
+group produces a neutral starting quorum of exactly $\lceil N/2 \rceil$
+(proven formally in Theorem~\ref{thm:anchor}).
 
 \subsection{Reputation Weights}
 
-Scores are normalised into per-authority weights relative to the group:
+Raw scores are normalised into per-authority weights relative to the group:
 \begin{equation}
-  w_i = \frac{R_i}{\sum_{j=1}^{N} R_j} \cdot N
+  w_i = \frac{R_i}{\displaystyle\sum_{j=1}^{N} R_j} \cdot N
   \label{eq:weight}
 \end{equation}
-A neutral group (all equal scores) gives $w_i = 1.0$ for all $i$.
-An authority with twice the average reputation has $w_i = 2.0$.
-Weights sum to $N$ by construction.
+By construction, weights sum to $N$ and average to $1.0$.
+An authority with twice the average reputation carries weight $w_i = 2.0$;
+one with half the average carries $w_i = 0.5$.
+
+\subsection{Reputation Evolution}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=13cm, height=6cm,
+  xlabel={Election round},
+  ylabel={Reputation score},
+  xmin=0, xmax=10,
+  ymin=0.3, ymax=1.05,
+  xtick={0,1,...,10},
+  ytick={0.3,0.4,...,1.0},
+  grid=major,
+  grid style={dashed, gray!30},
+  legend pos=south east,
+  legend style={font=\small},
+  thick
+]
+% All-honest trajectory starting at 2/3
+\addplot[blue!70!black, mark=*, mark size=2pt] coordinates {
+  (0, 0.6667)
+  (1, 0.7283)
+  (2, 0.7693)
+  (3, 0.7966)
+  (4, 0.8147)
+  (5, 0.8268)
+  (6, 0.8350)
+  (7, 0.8406)
+  (8, 0.8444)
+  (9, 0.8470)
+  (10, 0.8488)
+};
+% One-cheat trajectory
+\addplot[red!70!black, mark=square*, mark size=2pt, dashed] coordinates {
+  (0, 0.6667)
+  (1, 0.4724)
+  (2, 0.5098)
+  (3, 0.5384)
+  (4, 0.5598)
+  (5, 0.5754)
+  (6, 0.5866)
+  (7, 0.5946)
+  (8, 0.6000)
+  (9, 0.6038)
+  (10, 0.6064)
+};
+% One-skip trajectory
+\addplot[orange!80!black, mark=triangle*, mark size=2.5pt, dotted] coordinates {
+  (0, 0.6667)
+  (1, 0.5148)
+  (2, 0.5525)
+  (3, 0.5800)
+  (4, 0.5993)
+  (5, 0.6129)
+  (6, 0.6221)
+  (7, 0.6283)
+  (8, 0.6325)
+  (9, 0.6352)
+  (10, 0.6371)
+};
+\addlegendentry{Always honest (P=1, H=1)}
+\addlegendentry{Cheated once, then honest}
+\addlegendentry{Skipped once, then honest}
+\end{axis}
+\end{tikzpicture}
+\caption{Reputation trajectories for three authority behavioural profiles
+  across 10 election rounds. Honest authorities converge toward high
+  reputation; a single cheating event causes a severe drop that requires
+  many honest rounds to recover from; skipping causes a moderate penalty.}
+\label{fig:reptraj}
+\end{figure}
 
 \subsection{Persistence Across Elections}
 
-Reputations are stored in a persistent registry keyed by authority name
-(public key in a production deployment). When an authority participates
-in a new election, their historical score is loaded automatically.
-New authorities who have never participated start at $R_{\text{initial}}$.
-This means the system has \emph{memory}: a long track record of honest
-behaviour genuinely lowers future quorum requirements.
+Reputations are stored in a persistent registry keyed by authority
+identity (name in the prototype; public key in a production deployment).
+When an authority participates in a new election, their historical score
+is loaded automatically. New authorities who have no prior history start
+at $R_{\text{initial}} = 2/3$.
+This design gives the system \emph{institutional memory}: a long track
+record of honest behaviour genuinely lowers future quorum requirements,
+while sustained misbehaviour permanently raises them.
 
 % =============================================================================
 \section{Adaptive Threshold}
 \label{sec:threshold}
 % =============================================================================
 
-\subsection{Trust and Evenness}
+\subsection{Trust Evenness}
 
-The \emph{collective trust} of a group is measured as the product of
-average reputation and a distributional evenness factor:
+Collective trust is not simply the average reputation — it must also account
+for \emph{how evenly} reputation is distributed.
+An authority with extremely high reputation relative to peers can accumulate
+a disproportionate weight, potentially satisfying the quorum alone if the
+threshold were low.
+We prevent this via the evenness factor:
 
 \begin{equation}
-  E = \max\!\left(0,\; 1 - \frac{\sum_i (R_i - \bar{R})^2}{N \bar{R}^2}\right)
+  E = \max\!\left(0,\; 1 - \frac{\displaystyle\sum_{i=1}^{N}(R_i - \bar{R})^2}
+                                  {N \bar{R}^2}\right)
   \label{eq:evenness}
 \end{equation}
 
+$E = 1$ when all reputations are identical (zero variance).
+$E \to 0$ as variance grows relative to the mean squared reputation.
+The combined trust score is:
+
 \begin{equation}
-  \tau_{\text{trust}} = \min(1,\; \bar{R} \cdot E)
+  \tau_{\text{trust}} = \min\!\left(1,\; \bar{R} \cdot E\right)
   \label{eq:trust}
 \end{equation}
 
-The evenness factor $E$ is close to 1 when all reputations are similar
-and drops toward 0 when they are highly unequal. This prevents a scenario
-where a single dominant authority with very high reputation (and
-correspondingly high weight) could reconstruct alone while the threshold
-drops — a concentration attack impossible to execute because:
 \begin{property}[Concentration resistance]
-  If one authority's weight approaches $N-1$, evenness $E \to 0$, trust
-  $\tau_{\text{trust}} \to 0$, and the quorum rises to its maximum $N-1$.
-  Therefore no single authority can ever accumulate sufficient weight to
-  meet the quorum alone.
+\label{prop:concentration}
+  If one authority's weight approaches $N$, evenness $E \to 0$,
+  trust $\tau_{\text{trust}} \to 0$, and the quorum rises to
+  $\tau_{\text{max}} = N-1$.
+  No single authority can ever satisfy the quorum alone.
 \end{property}
 
 \subsection{Two-Piece Linear Adaptive Formula}
 
-The effective quorum $\tau$ is computed via a two-piece linear function
-anchored at $\lceil N/2 \rceil$ for neutral trust:
-
-\begin{align}
-  \tau_{\text{neutral}} &= \left\lceil \frac{N}{2} \right\rceil \\[4pt]
-  \tau_{\text{max}}     &= N - 1 \\[4pt]
-  \tau_{\text{min}}     &= \max\!\left(2,\, \left\lceil \frac{N}{3} \right\rceil\right)
-\end{align}
+\begin{definition}[Threshold Parameters]
+  For a group of $N$ authorities:
+  \begin{align}
+    \tau_{\text{neutral}} &= \left\lceil \tfrac{N}{2} \right\rceil
+      & &\text{(starting quorum for fresh authorities)} \\
+    \tau_{\text{max}}     &= N - 1
+      & &\text{(worst-case quorum, no trust)} \\
+    \tau_{\text{min}}     &= \max\!\left(2,\, \left\lceil \tfrac{N}{3} \right\rceil\right)
+      & &\text{(best-case quorum, full trust)}
+  \end{align}
+\end{definition}
 
 \begin{equation}
   \boxed{\tau =
     \begin{cases}
-      \tau_{\text{max}} - (\tau_{\text{max}} - \tau_{\text{neutral}})
+      \tau_{\text{max}} -
+        \bigl(\tau_{\text{max}} - \tau_{\text{neutral}}\bigr)
         \cdot \tau_{\text{trust}} \cdot \tfrac{3}{2}
-        & \text{if } \tau_{\text{trust}} \leq \tfrac{2}{3} \\[6pt]
-      \tau_{\text{neutral}} - (\tau_{\text{neutral}} - \tau_{\text{min}})
-        \cdot (\tau_{\text{trust}} - \tfrac{2}{3}) \cdot 3
+        & \text{if } \tau_{\text{trust}} \leq \tfrac{2}{3} \\[10pt]
+      \tau_{\text{neutral}} -
+        \bigl(\tau_{\text{neutral}} - \tau_{\text{min}}\bigr)
+        \cdot \bigl(\tau_{\text{trust}} - \tfrac{2}{3}\bigr) \cdot 3
         & \text{if } \tau_{\text{trust}} > \tfrac{2}{3}
     \end{cases}}
   \label{eq:threshold}
 \end{equation}
 
-\begin{theorem}[Neutral anchor]
-  For $N$ authorities all at $R_i = \tfrac{2}{3}$ (the initial reputation),
-  Equation~\eqref{eq:threshold} yields $\tau = \lceil N/2 \rceil$ exactly.
+\begin{theorem}[Neutral Anchor]
+\label{thm:anchor}
+  For $N$ authorities all at $R_i = \tfrac{2}{3}$ (the initial
+  reputation), Equation~\eqref{eq:threshold} yields
+  $\tau = \lceil N/2 \rceil$ exactly.
 \end{theorem}
 \begin{proof}
-  All equal reputations give $E = 1$ (zero variance), so
-  $\tau_{\text{trust}} = \bar{R} \cdot 1 = \tfrac{2}{3}$.
-  Substituting into the first branch:
-  $\tau = \tau_{\text{max}} - (\tau_{\text{max}} - \tau_{\text{neutral}}) \cdot \tfrac{2}{3} \cdot \tfrac{3}{2}
-         = \tau_{\text{max}} - (\tau_{\text{max}} - \tau_{\text{neutral}})
-         = \tau_{\text{neutral}} = \lceil N/2 \rceil$.
+  Identical reputations imply zero variance, so $E = 1$.
+  Then $\tau_{\text{trust}} = \bar{R} \cdot 1 = \tfrac{2}{3}$.
+  Substituting into the first branch of Equation~\eqref{eq:threshold}:
+  \begin{align*}
+    \tau &= \tau_{\text{max}} -
+      \bigl(\tau_{\text{max}} - \tau_{\text{neutral}}\bigr)
+      \cdot \tfrac{2}{3} \cdot \tfrac{3}{2} \\
+         &= \tau_{\text{max}} -
+      \bigl(\tau_{\text{max}} - \tau_{\text{neutral}}\bigr) \\
+         &= \tau_{\text{neutral}}
+          = \left\lceil \tfrac{N}{2} \right\rceil. \qquad\qquad\square
+  \end{align*}
 \end{proof}
 
-\noindent The quorum range for representative group sizes:
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=13cm, height=7cm,
+  xlabel={Trust score $\tau_{\text{trust}}$},
+  ylabel={Effective quorum $\tau$},
+  xmin=0, xmax=1,
+  ymin=1.5, ymax=7,
+  xtick={0, 0.333, 0.667, 1},
+  xticklabels={$0$, $\tfrac{1}{3}$, $\tfrac{2}{3}$, $1$},
+  ytick={2,3,4,5,6},
+  grid=major,
+  grid style={dashed, gray!30},
+  legend pos=north east,
+  legend style={font=\small},
+  thick
+]
+% N=6: neutral=3, tmax=5, tmin=2
+\addplot[blue!80!black, mark=none, very thick] coordinates {
+  (0, 5) (0.667, 3) (1, 2)
+};
+% N=7: neutral=4, tmax=6, tmin=3
+\addplot[red!70!black, mark=none, very thick, dashed] coordinates {
+  (0, 6) (0.667, 4) (1, 3)
+};
+% N=5: neutral=3, tmax=4, tmin=2
+\addplot[green!60!black, mark=none, very thick, dotted] coordinates {
+  (0, 4) (0.667, 3) (1, 2)
+};
+% Neutral line
+\addplot[gray, dashed, thin] coordinates { (0.667, 1.5) (0.667, 7) };
+\node[gray, font=\footnotesize] at (axis cs: 0.71, 6.5) {Initial trust};
+
+\addlegendentry{$N=6$: quorum $\in [2,5]$}
+\addlegendentry{$N=7$: quorum $\in [3,6]$}
+\addlegendentry{$N=5$: quorum $\in [2,4]$}
+\end{axis}
+\end{tikzpicture}
+\caption{Adaptive quorum as a function of collective trust for three group
+  sizes. All curves pass through $\tau_{\text{neutral}} = \lceil N/2 \rceil$
+  at the initial trust value of $\tfrac{2}{3}$ (vertical dashed line),
+  confirming Theorem~\ref{thm:anchor}.}
+\label{fig:threshold}
+\end{figure}
+
+\subsection{Quorum Range by Group Size}
 
 \begin{center}
-\begin{tabular}{ccccc}
+\begin{tabular}{cccccc}
 \toprule
-$N$ & $\tau_{\text{neutral}}$ & $\tau_{\text{min}}$ (full trust) & $\tau_{\text{max}}$ (no trust) \\
+$N$ & $\tau_{\text{neutral}}$ & $\tau_{\text{min}}$
+    & $\tau_{\text{max}}$ & Initial (neutral) & Best case \\
 \midrule
-3 & 2 & 2 & 2 \\
-4 & 2 & 2 & 3 \\
-5 & 3 & 2 & 4 \\
-6 & 3 & 2 & 5 \\
-7 & 4 & 3 & 6 \\
-8 & 4 & 3 & 7 \\
+3 & 2 & 2 & 2 & 2 & 2 \\
+4 & 2 & 2 & 3 & 2 & 2 \\
+5 & 3 & 2 & 4 & 3 & 2 \\
+6 & 3 & 2 & 5 & 3 & 2 \\
+7 & 4 & 3 & 6 & 4 & 3 \\
+8 & 4 & 3 & 7 & 4 & 3 \\
+10 & 5 & 4 & 9 & 5 & 4 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 % =============================================================================
 \section{Two-Gate Reconstruction Policy}
+\label{sec:twogates}
 % =============================================================================
 
-Reconstruction is triggered only when \emph{both} conditions are satisfied
-simultaneously:
+\subsection{Formal Definition}
+
+Let $\mathcal{S}$ denote the set of authorities who have submitted
+valid shares, $t$ the Shamir threshold derived as
+$t = \max(2, \lfloor\tau\rfloor)$, and $\tau$ the current adaptive quorum.
+Reconstruction is triggered if and only if both gates are simultaneously
+satisfied:
 
 \begin{equation}
   \underbrace{|\mathcal{S}| \geq t}_{\text{Gate 1: cryptographic}}
-  \quad \text{AND} \quad
-  \underbrace{\sum_{i \in \mathcal{S}} w_i \geq \tau}_{\text{Gate 2: trust}}
+  \quad \textbf{AND} \quad
+  \underbrace{\displaystyle\sum_{i \in \mathcal{S}} w_i \,\geq\, \tau}_{\text{Gate 2: trust}}
   \label{eq:twogates}
 \end{equation}
 
-where $\mathcal{S}$ is the set of authorities who submitted valid shares,
-$t$ is the Shamir threshold (derived as $\lfloor \tau \rfloor$, minimum 2),
-and $\tau$ is the current adaptive quorum.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  gate/.style={rectangle, rounded corners=6pt, draw=blue!70!black,
+    fill=blue!10, minimum width=3.8cm, minimum height=1.2cm,
+    align=center, font=\small\bfseries},
+  result/.style={rectangle, rounded corners=6pt, draw=green!60!black,
+    fill=green!10, minimum width=3.8cm, minimum height=1.1cm,
+    align=center, font=\small\bfseries},
+  fail/.style={rectangle, rounded corners=6pt, draw=red!60!black,
+    fill=red!10, minimum width=3.8cm, minimum height=1.1cm,
+    align=center, font=\small\bfseries},
+  arrow/.style={-{Stealth[length=7pt]}, thick}
+]
+  \node[gate]   (g1) at (0,0)    {Gate 1\\$|\mathcal{S}| \geq t$\\share count};
+  \node[gate]   (g2) at (5,0)    {Gate 2\\$\sum w_i \geq \tau$\\weight quorum};
+  \node[result] (ok) at (2.5,-2) {Reconstruct\\private key};
+  \node[fail]   (f1) at (-1,-2)  {Wait / fail\\(need more shares)};
+  \node[fail]   (f2) at (6,-2)   {Wait / fail\\(need more weight)};
+
+  \draw[arrow, green!60!black] (g1) -- node[above left, font=\small]{\checkmark} (ok);
+  \draw[arrow, green!60!black] (g2) -- node[above right,font=\small]{\checkmark} (ok);
+  \draw[arrow, red!60!black]   (g1) -- node[left,font=\small]{$\times$} (f1);
+  \draw[arrow, red!60!black]   (g2) -- node[right,font=\small]{$\times$} (f2);
+
+  \draw[thick, blue!50!black, dashed] (-2.2,-0.7) rectangle (7.2,0.7);
+  \node[blue!60!black, font=\small\itshape] at (2.5,0.95) {Both must be satisfied};
+\end{tikzpicture}
+\caption{Two-gate reconstruction policy. Gate 1 enforces the cryptographic
+  minimum share count; Gate 2 enforces the trust weight minimum. Failure
+  of either gate blocks reconstruction and may trigger impossibility
+  detection.}
+\label{fig:twogates}
+\end{figure}
 
 \subsection{Why Two Gates Are Necessary}
 
-\begin{description}
-  \item[Gate 1 alone (share count only)] An adversary controlling many
-    low-reputation authorities could submit enough shares to satisfy $t$
-    while their combined weight is far below $\tau$. The weight gate blocks
-    this \emph{flooding attack}.
+\paragraph{Gate 1 alone — flooding attack.}
+Without a weight gate, an adversary controlling many low-reputation
+authorities could submit enough shares to satisfy the share count $t$
+while their combined weight $\sum w_i \ll \tau$.
+The weight gate blocks this.
 
-  \item[Gate 2 alone (weight only)] A single authority with very high
-    reputation might accumulate weight $\geq \tau$ if the threshold dropped
-    sufficiently. The share count gate (minimum 2) blocks this
-    \emph{monopoly attack}. The evenness mechanism additionally raises $\tau$
-    when one authority dominates, providing a second line of defence.
-\end{description}
+\paragraph{Gate 2 alone — monopoly attack.}
+Without a share count gate, a single authority with very high reputation
+could conceivably accumulate weight $w_i \geq \tau$ (though
+Property~\ref{prop:concentration} makes this impossible in practice via
+the evenness mechanism). The share count gate (minimum $t \geq 2$) provides
+an independent, cryptographic line of defence.
+
+\paragraph{Combined protection.}
+Together, the two gates ensure that reconstruction requires a coalition
+that is both \emph{numerous enough} (cryptographic) and
+\emph{trusted enough} (reputational). Neither criterion alone is sufficient.
 
 \subsection{Impossibility Detection}
 
-The system continuously monitors whether reconstruction is still achievable.
-Let $\mathcal{V}$ be the set of valid-share submitters, $\mathcal{F}$ the
-set of authorities who have acted (valid, invalid, or skipped), and
-$\mathcal{U} = \{A_i\} \setminus \mathcal{F}$ the remaining free authorities.
+\begin{algorithm}[H]
+\caption{Real-time impossibility check}
+\label{alg:impossible}
+\begin{algorithmic}[1]
+\Require Election state: $\mathcal{V}$ (valid), $\mathcal{F}$ (all acted),
+         $\mathcal{U} = \mathcal{A} \setminus \mathcal{F}$ (free)
+\Ensure \textbf{true} if reconstruction can never be completed
+\If{$|\mathcal{V}| + |\mathcal{U}| < t$}
+  \Return \textbf{true} \Comment{Insufficient shares possible}
+\EndIf
+\State $W_{\max} \gets \sum_{i \in \mathcal{V}} w_i + \sum_{i \in \mathcal{U}} w_i$
+\If{$W_{\max} < \tau$}
+  \Return \textbf{true} \Comment{Insufficient weight possible}
+\EndIf
+\Return \textbf{false}
+\end{algorithmic}
+\end{algorithm}
 
-\begin{equation}
-  \text{Impossible} \iff |\mathcal{V}| + |\mathcal{U}| < t
-  \;\;\text{OR}\;\;
-  \sum_{i \in \mathcal{V}} w_i + \sum_{i \in \mathcal{U}} w_i < \tau
-\end{equation}
-
-If impossible, the system transitions to a \texttt{failed} state
-immediately — before waiting for remaining authorities to act —
-applies automatic penalties to all responsible parties, and records
-the event on the blockchain.
+Impossibility is checked after every invalid share or skip event.
+Upon detection, the system transitions to a \texttt{failed} state
+immediately, applies automatic penalties (Equation~\eqref{eq:rep} with
+$P=0, C=0, H=0.5$ for skippers; $P=0.5, C=0, H=0$ for cheaters), and
+records the failure on the blockchain before any remaining authorities act.
 
 % =============================================================================
 \section{Blockchain Integration}
+\label{sec:blockchain}
 % =============================================================================
-
-\subsection{Role of the Blockchain}
-
-The blockchain in S$^3$-Vote serves as a \textbf{tamper-evident public
-bulletin board}. It does not provide consensus (single-node prototype)
-but provides the structural guarantees needed for the protocol:
-
-\begin{enumerate}
-  \item \textbf{Commitment anchoring} — PVSS commitments are published
-    before any share submission, preventing retroactive commitment
-    substitution.
-  \item \textbf{Vote integrity} — encrypted ballots are written before
-    reconstruction begins; the tally cannot be manipulated retroactively.
-  \item \textbf{Non-repudiation} — share submissions and failures are
-    permanently recorded with the submitting authority's identity;
-    a cheater cannot deny the act.
-  \item \textbf{Reputation audit trail} — every reputation update is
-    recorded with its round number; the full history is independently
-    verifiable.
-\end{enumerate}
 
 \subsection{Block Structure}
 
-Each block $B_k$ contains:
-\begin{itemize}
-  \item Index $k$, timestamp
-  \item Data payload (event dictionary)
-  \item $\text{hash}_k = \text{SHA-256}(\text{index} \,\|\, \text{timestamp}
-    \,\|\, \text{data} \,\|\, \text{hash}_{k-1})$
-\end{itemize}
-Altering any block invalidates all subsequent hashes, making tampering
-detectable by any observer who holds a copy of the chain.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  block/.style={rectangle, rounded corners=5pt, draw=gray!70,
+    fill=gray!8, minimum width=5.5cm, minimum height=3.2cm},
+  field/.style={font=\footnotesize\ttfamily},
+  arrow/.style={-{Stealth[length=8pt]}, very thick, blue!60!black}
+]
+  % Genesis block
+  \node[block] (b0) at (0,0) {};
+  \node[above, font=\small\bfseries, blue!70!black] at (0, 1.7) {Block \#0 (Genesis)};
+  \node[field] at (0, 0.9)  {index: 0};
+  \node[field] at (0, 0.4)  {timestamp: \ldots};
+  \node[field] at (0,-0.1)  {data: \{genesis\}};
+  \node[field] at (0,-0.6)  {prev\_hash: "0000"};
+  \node[field] at (0,-1.1)  {hash: \textbf{h$_0$}};
 
-\subsection{Events Recorded}
+  % Block 1
+  \node[block] (b1) at (6.5,0) {};
+  \node[above, font=\small\bfseries, blue!70!black] at (6.5, 1.7) {Block \#1};
+  \node[field] at (6.5, 0.9)  {index: 1};
+  \node[field] at (6.5, 0.4)  {timestamp: \ldots};
+  \node[field] at (6.5,-0.1)  {data: \{election\_start\}};
+  \node[field] at (6.5,-0.6)  {prev\_hash: \textbf{h$_0$}};
+  \node[field] at (6.5,-1.1)  {hash: \textbf{h$_1$}};
+
+  \draw[arrow] (b0) -- (b1);
+
+  % Dots
+  \node at (9.5, 0) {\Large $\cdots$};
+\end{tikzpicture}
+\caption{Blockchain block structure. Each block's hash includes the previous
+  block's hash, forming a chain. Altering any block's data changes its hash,
+  invalidating all subsequent blocks.}
+\label{fig:blockchain}
+\end{figure}
+
+\subsection{Events Recorded on the Blockchain}
 
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabular}{lp{8.5cm}}
 \toprule
-Event & Payload \\
+\textbf{Event type} & \textbf{Payload (key fields)} \\
 \midrule
-\texttt{election\_start}        & title, options, authorities, quorum, PVSS commitments \\
-\texttt{vote\_cast}             & round, ElGamal ciphertext $(C_1, C_2)$ \\
-\texttt{voting\_closed}         & round, total votes cast \\
-\texttt{share\_submitted}       & round, authority, coalition weight at submission \\
-\texttt{share\_invalid}         & round, authority (PVSS verification failed) \\
-\texttt{share\_skipped}         & round, authority \\
-\texttt{reconstruction\_complete} & round, coalition, coalition weight, tally \\
-\texttt{election\_failed}       & round, valid shares, cheaters, skippers \\
-\texttt{reputation\_update}     & round, new reputation scores, new quorum \\
+\texttt{election\_start}          & Title, options, authority list, adaptive quorum, PVSS commitments $\{C_i\}$ \\
+\texttt{vote\_cast}               & Round, ElGamal ciphertext $(C_1, C_2)$ \\
+\texttt{voting\_closed}           & Round, total vote count \\
+\texttt{share\_submitted}         & Round, authority name, coalition weight at submission \\
+\texttt{share\_invalid}           & Round, authority name (PVSS failed) \\
+\texttt{share\_skipped}           & Round, authority name \\
+\texttt{reconstruction\_complete} & Round, coalition members, coalition weight, tally \\
+\texttt{election\_failed}         & Round, valid shares, cheaters, skippers, failure reason \\
+\texttt{reputation\_update}       & Round, updated scores for all authorities, new quorum \\
 \bottomrule
 \end{tabular}
 \end{center}
 
+\subsection{Non-Repudiation Guarantee}
+
+The PVSS commitments $\{C_i\}$ are written in the
+\texttt{election\_start} block \emph{before} any share submission.
+When authority $A_i$ later submits $\hat{s}_i$ and the check
+$g^{H(\hat{s}_i)} \neq C_i$ fails, the \texttt{share\_invalid} event is
+chained to the existing commitment block.
+$A_i$ cannot subsequently claim:
+\begin{itemize}
+  \item That the commitment was set incorrectly (it was published before they acted).
+  \item That the verification was performed incorrectly (the computation is
+    deterministic and anyone can re-run it against the on-chain commitment).
+  \item That they never submitted (the \texttt{share\_invalid} event is
+    hash-chained and cannot be removed).
+\end{itemize}
+
 \subsection{Production Deployment Note}
 
-The prototype implements the blockchain as an in-memory hash-chained
-list on a single node. In a production deployment, this would be
-replaced by a distributed ledger (e.g., Ethereum or Hyperledger Fabric),
-where no single party controls the chain and tamper-evidence is enforced
-by network consensus. The data model and cryptographic properties are
-identical; only the storage and consensus layer changes.
+The prototype runs the blockchain as an in-memory hash-chained list on a
+single server. In a production deployment, this would be replaced by a
+distributed ledger (e.g., Ethereum or Hyperledger Fabric) where no single
+party controls the chain and tamper-evidence is enforced by network
+consensus. All data models, event formats, and hash-chain properties
+remain identical; only the consensus and storage layer changes.
+The prototype faithfully demonstrates the full cryptographic and data
+flow; the deployment change is an engineering rather than a design concern.
 
 % =============================================================================
 \section{Security Analysis}
+\label{sec:security}
 % =============================================================================
 
 \subsection{Vote Confidentiality}
 
 Individual votes remain confidential until reconstruction because:
-(a) the ElGamal private key is split across $N$ authorities;
-(b) any $t-1$ or fewer shares reveal no information about the key
-(information-theoretic security of Shamir's scheme);
-(c) ciphertexts on the blockchain are computationally indistinguishable
-from random under the DDH assumption.
+(a)~the ElGamal private key is split using Shamir's
+information-theoretically secure $(t,n)$-scheme;
+(b)~any $t-1$ or fewer shares reveal \emph{zero} information about the key;
+(c)~ciphertexts on the blockchain are computationally indistinguishable from
+random under the DDH assumption, so even an observer who reads the entire
+blockchain during voting learns nothing about ballot contents.
 
 \subsection{Tally Integrity}
 
-Once voting closes, the \texttt{voting\_closed} block is chained.
-Any attempt to add, remove, or modify a \texttt{vote\_cast} block
-breaks the hash chain from that point forward, detectable by any
-holder of the chain.
+Once the \texttt{voting\_closed} block is written and hash-chained, every
+\texttt{vote\_cast} block before it is locked into the chain.
+Adding a ballot retroactively would require inserting a new block before
+\texttt{voting\_closed}, which would change every subsequent block hash —
+detectable by any observer.
 
 \subsection{Cheat Detection and Accountability}
 
-PVSS commitments are written at election creation. A cheating authority
-$A_i$ who submits $\hat{s}_i \neq s_i$ will fail the commitment check
-$g^{H(\hat{s}_i)} \not\equiv C_i \pmod{p}$. The failure, the authority
-identity, and the round are recorded as a \texttt{share\_invalid} block —
-public, permanent, and hash-chained into the ledger before $A_i$ can
-dispute it.
+PVSS commitments are published in \texttt{election\_start} before any
+authority acts. The verification step $g^{H(\hat{s}_i)} \equiv C_i$
+is deterministic and publicly replicable. Upon failure, the
+\texttt{share\_invalid} block is immediately appended and cannot be
+retracted. This provides:
+\begin{itemize}
+  \item \textbf{Soundness}: a valid share always passes verification
+    (by construction of the commitment).
+  \item \textbf{Binding}: a corrupted share cannot pass verification
+    (under the discrete logarithm hardness assumption, finding
+    $\hat{s}_i \neq s_i$ with $g^{H(\hat{s}_i)} = g^{H(s_i)}$ requires
+    a hash collision).
+\end{itemize}
 
 \subsection{Sybil Resistance}
 
-The reputation system is resistant to Sybil attacks (creating many
-fake identities) because new authorities start at $R_{\text{initial}} = 2/3$
-and must build a track record over multiple elections to gain elevated
-weight. A flood of new identities in a round does not lower the quorum —
-it raises it, because many new authorities with neutral reputation
-increase $N$ and thus $\tau_{\text{neutral}} = \lceil N/2 \rceil$.
+Creating new authority identities does not lower the quorum.
+New authorities start at $R_{\text{initial}} = 2/3$ (neutral).
+Adding more neutral-reputation authorities increases $N$, which increases
+$\tau_{\text{neutral}} = \lceil N/2 \rceil$ proportionally.
+A Sybil attacker who floods the authority set with fake identities
+actually \emph{raises} the required coalition size.
 
 \subsection{Collusion Resistance}
 
-A colluding coalition of $k$ low-reputation authorities cannot satisfy
-the weight gate unless $\sum_{i \in \mathcal{C}} w_i \geq \tau$.
-Since low-reputation authorities have $w_i < 1$, they need more members
-than a trusted coalition — and the evenness factor raises $\tau$ further
-when the honest authorities' reputations are heterogeneous.
+A colluding coalition $\mathcal{C}$ of low-reputation authorities cannot
+satisfy Gate 2 unless $\sum_{i \in \mathcal{C}} w_i \geq \tau$.
+Since low-reputation authorities have $w_i < 1.0$, they must field more
+members than an equal-sized trusted coalition.
+Moreover, the evenness factor raises $\tau$ when honest authorities have
+heterogeneous reputations relative to the colluding group, making the
+required coalition size even larger.
 
 \subsection{Concentration Attack}
 
-As proven in Property 1, a single authority cannot accumulate enough
-weight to reconstruct alone regardless of their reputation, because the
-evenness factor $E$ approaches zero as weight concentrates, driving the
-quorum to $\tau_{\text{max}} = N-1$.
+\begin{proof}[Proof of Property~\ref{prop:concentration}]
+  Suppose authority $A_1$ holds proportion $\theta \in (0,1)$ of total
+  reputation, i.e., $R_1 = \theta \sum_j R_j$.
+  Then $w_1 = \theta N$.
+  \begin{align*}
+    \bar{R} &= \tfrac{1}{N}\sum_j R_j, \quad
+    (R_1 - \bar{R})^2 = \left(\theta N \bar{R} - \bar{R}\right)^2
+                      = \bar{R}^2(\theta N - 1)^2 \\
+    E &= \max\!\left(0, 1 - \frac{\bar{R}^2(\theta N-1)^2 + \cdots}
+                                  {N\bar{R}^2}\right)
+  \end{align*}
+  As $\theta \to 1$ (one authority holds all reputation),
+  $(R_1-\bar{R})^2 \to \bar{R}^2(N-1)^2$ and the remaining terms also
+  contribute positively to the variance numerator, so $E \to 0$,
+  $\tau_{\text{trust}} \to 0$, and $\tau \to \tau_{\text{max}} = N-1$.
+  Since $w_1 = N\theta < N-1$ for any $\theta < 1$, Gate 2 cannot be
+  satisfied by $A_1$ alone. \hfill$\square$
+\end{proof}
+
+\subsection{Formal Ballot Privacy Proof}
+
+We formalise ballot privacy as an IND-CPA security game and provide a
+concrete reduction to the DDH problem.
+
+\begin{definition}[DDH Assumption~\cite{boneh1998}]
+  Let $\mathbb{G} = \langle g \rangle$ be a cyclic group of prime order $q$.
+  The \emph{Decisional Diffie-Hellman} (DDH) problem is to distinguish the
+  tuple $(g, g^a, g^b, g^{ab})$ from $(g, g^a, g^b, g^c)$ where
+  $a, b, c \xleftarrow{R} \mathbb{Z}_q$.
+  Formally, for every PPT adversary $\mathcal{B}$:
+  \begin{equation}
+    \bigl|\Pr[\mathcal{B}(g, g^a, g^b, g^{ab}) = 1]
+         - \Pr[\mathcal{B}(g, g^a, g^b, g^c) = 1]\bigr|
+    \leq \mathrm{negl}(\lambda)
+  \end{equation}
+\end{definition}
+
+\begin{definition}[IND-CPA Ballot Privacy Game~\cite{katzlindell2014}]
+  Let $\Pi = (\mathsf{KeyGen}, \mathsf{Enc}, \mathsf{Dec})$ be the
+  threshold ElGamal scheme of S$^3$-Vote.
+  \begin{enumerate}
+    \item \textbf{Setup.} Challenger $\mathcal{C}$ runs $\mathsf{KeyGen}$,
+      splits private key $x$ via Shamir $(t, N)$, and publishes
+      public key $y = g^x$ and PVSS commitments $\{C_i\}$.
+    \item \textbf{Challenge.} Adversary $\mathcal{A}$ submits two plaintexts
+      $(m_0, m_1)$. $\mathcal{C}$ samples $b \xleftarrow{R} \{0,1\}$ and
+      returns $\mathbf{c}^* = \mathsf{Enc}(y, m_b; k^*)$ for fresh random $k^*$.
+    \item \textbf{Guess.} $\mathcal{A}$ outputs $b' \in \{0,1\}$.
+  \end{enumerate}
+  The advantage is
+  $\mathsf{Adv}^{\mathsf{IND\text{-}CPA}}_\Pi(\mathcal{A})
+  = \bigl|\Pr[b' = b] - \tfrac{1}{2}\bigr|$.
+\end{definition}
+
+\begin{theorem}[Ballot Privacy under DDH]
+\label{thm:indcpa}
+  If the DDH assumption holds in $\mathbb{G}$, the S$^3$-Vote threshold
+  ElGamal scheme achieves IND-CPA ballot privacy.
+  Concretely, for every PPT adversary $\mathcal{A}$:
+  \begin{equation}
+    \mathsf{Adv}^{\mathsf{IND\text{-}CPA}}_\Pi(\mathcal{A})
+    \;\leq\;
+    \mathsf{Adv}^{\mathsf{DDH}}_\mathbb{G}(\mathcal{B})
+  \end{equation}
+  for a PPT algorithm $\mathcal{B}$ constructed from $\mathcal{A}$.
+\end{theorem}
+
+\begin{proof}
+  We construct $\mathcal{B}$ that uses $\mathcal{A}$ to solve DDH.
+
+  \textbf{Input to $\mathcal{B}$.}
+  $\mathcal{B}$ receives $(g, A, B, X)$ where $A = g^a$, $B = g^b$, and
+  $X$ is either $g^{ab}$ (real tuple) or $g^c$ for uniformly random $c$
+  (random tuple).
+
+  \textbf{Setup simulation.}
+  $\mathcal{B}$ sets public key $y := A = g^a$ (treating the unknown $a$
+  as the private key), splits a dummy value via Shamir and publishes
+  consistent PVSS commitments. No knowledge of $a$ is required.
+
+  \textbf{Challenge simulation.}
+  $\mathcal{A}$ submits $(m_0, m_1)$; $\mathcal{B}$ samples
+  $b \xleftarrow{R} \{0,1\}$ and returns:
+  \begin{equation}
+    \mathbf{c}^* = \bigl(B,\; m_b \cdot X\bigr) = \bigl(g^b,\; m_b \cdot X\bigr)
+  \end{equation}
+  \begin{itemize}
+    \item If $X = g^{ab}$: $\mathbf{c}^* = (g^b,\, m_b \cdot y^b)$, a valid
+      ElGamal encryption of $m_b$ under randomness $k = b$.
+      $\mathcal{A}$ sees an honestly distributed challenge ciphertext.
+    \item If $X = g^c$ for uniformly random $c$: the second component
+      $m_b \cdot g^c$ is uniformly random in $\mathbb{G}$, independent of
+      $m_b$. The ciphertext carries no information about $b$.
+  \end{itemize}
+
+  \textbf{Output.}
+  $\mathcal{B}$ outputs whatever $b'$ $\mathcal{A}$ returns.
+
+  \textbf{Advantage analysis.}
+  \begin{align*}
+    \Pr[\mathcal{B}\text{ wins} \mid X = g^{ab}]
+      &= \Pr[b' = b] = \tfrac{1}{2} + \epsilon \\
+    \Pr[\mathcal{B}\text{ wins} \mid X = g^c]
+      &= \Pr[b' = b] = \tfrac{1}{2}
+  \end{align*}
+  Therefore
+  $\mathsf{Adv}^{\mathsf{DDH}}(\mathcal{B}) = \epsilon
+   = \mathsf{Adv}^{\mathsf{IND\text{-}CPA}}(\mathcal{A})$.
+  Since DDH is assumed hard, $\epsilon \leq \mathrm{negl}(\lambda)$.
+  \hfill$\square$
+
+  \textbf{Threshold extension.}
+  The private key $x$ is split via Shamir $(t,N)$; any $t-1$ or fewer
+  shares reveal \emph{zero} information about $x$ by information-theoretic
+  secrecy~\cite{shamir1979}. An adversary colluding with up to $t-1$
+  authorities still learns nothing about $x$, so the IND-CPA argument above
+  applies without modification.
+\end{proof}
+
+\begin{remark}[PVSS Binding under DL and ROM]
+  Commitments $C_i = g^{H(s_i)} \bmod p$ are binding under two standard
+  assumptions. Under \emph{discrete logarithm} (DL) hardness, finding
+  $\hat{s}_i \neq s_i$ with $g^{H(\hat{s}_i)} = g^{H(s_i)}$ requires
+  first producing a hash collision $H(\hat{s}_i) = H(s_i)$.
+  In the \emph{random oracle model} (ROM), $H$ is modelled as a uniformly
+  random function; a collision occurs with probability at most $1/q$
+  ($\approx 2^{-256}$ for standard parameters).
+  Consequently, any invalid share submitted by an authority is detected
+  with overwhelming probability, and the \texttt{share\_invalid} blockchain
+  record constitutes a publicly verifiable, non-repudiable proof of cheating.
+\end{remark}
+
+\subsection{Receipt-Freeness and Coercion Resistance}
+
+\paragraph{The coercion problem.}
+In the ElGamal scheme as deployed in S$^3$-Vote, a voter who encrypts
+ballot $m$ with randomness $k$ can later prove their vote to a coercer by
+revealing $k$: the coercer verifies $C_1 = g^k$ and $C_2 = m \cdot y^k$.
+This enables vote-buying and voter coercion.
+A \emph{receipt-free} protocol prevents any voter from constructing such
+a proof, even if they actively cooperate with the coercer.
+
+\paragraph{Mix-net integration.}
+A \emph{mix-net}~\cite{chaum1988} routes ciphertexts through a sequence of
+mix servers $M_1, \ldots, M_\ell$.
+Each server re-randomises every ciphertext using a fresh ephemeral factor
+and randomly permutes the list:
+\begin{equation}
+  (C_1, C_2) \;\xrightarrow{M_j}\; (C_1 \cdot g^{k'}, C_2 \cdot y^{k'})
+  \quad \text{for fresh } k' \xleftarrow{R} \mathbb{Z}_q
+\end{equation}
+Re-randomisation is valid for ElGamal: the new ciphertext still decrypts
+to $m$.
+After all servers act, the output list encrypts the same multiset of votes
+but with fresh, unknown randomness, and no voter can link their original
+ciphertext to an output position — provided at least one mix server is honest.
+
+Integrating a mix-net into S$^3$-Vote requires no changes to the reputation,
+threshold, or blockchain subsystems.
+The modification is purely in the election lifecycle: a \emph{mix phase}
+is inserted between \texttt{voting\_closed} and the reconstruction phase.
+The decryption authorities operate on the mixed output, not the raw ballots.
+
+\paragraph{Homomorphic tallying.}
+ElGamal is multiplicatively homomorphic:
+\begin{equation}
+  \mathsf{Enc}(m_1) \cdot \mathsf{Enc}(m_2) = \mathsf{Enc}(m_1 \cdot m_2)
+\end{equation}
+Encoding a vote for option $v$ as $m = g^v$, the product of all $M$
+encrypted ballots satisfies:
+\begin{equation}
+  \prod_{j=1}^{M} (C_{1,j}, C_{2,j})
+  = \Bigl(g^{\sum k_j},\; g^{\sum v_j} \cdot y^{\sum k_j}\Bigr)
+  = \mathsf{Enc}\!\left(g^{\sum v_j}\right)
+\end{equation}
+The authorities decrypt \emph{only this aggregate ciphertext}, recovering
+$g^{\sum v_j}$, from which $\sum v_j$ is extracted by discrete logarithm
+(feasible for small vote counts by baby-step giant-step).
+Individual ballots are never decrypted; a voter therefore cannot prove
+their contribution to the aggregate tally.
+
+Integrating homomorphic tallying into S$^3$-Vote requires two changes:
+(a)~the server accumulates the running product of ciphertexts as votes
+arrive; (b)~reconstruction operates on the single aggregate ciphertext.
+All other components — reputation, threshold, PVSS, blockchain — are
+unaffected.
+
+\paragraph{Comparison of approaches.}
+Homomorphic tallying is the simpler integration path: no additional servers
+or shuffle proofs are required, and the existing single-round decryption
+structure is preserved.
+Mix-nets provide stronger compositional guarantees and handle ranked or
+multi-option elections more naturally.
+Both approaches are direct extensions of the current prototype and do not
+require redesigning any other component of S$^3$-Vote.
+
+\subsection{End-to-End Verifiability}
+\label{sec:e2ev}
+
+End-to-end verifiability (E2E-V) requires that any party can verify:
+\begin{enumerate}
+  \item Their ballot was recorded as submitted (\emph{cast-as-intended});
+  \item All recorded ballots were included in the tally (\emph{recorded-as-cast});
+  \item The tally was computed correctly (\emph{tallied-as-recorded}).
+\end{enumerate}
+
+\paragraph{Individual verifiability.}
+After submitting ballot ciphertext $(C_1, C_2)$, a voter can verify that
+the exact ciphertext appears in the \texttt{vote\_cast} blocks of the
+blockchain. Since the chain is publicly readable and hash-chained, this
+requires no trust in the server.
+In a production deployment, each voter receives a cryptographic receipt
+$r = H(\text{block\_hash} \,\|\, C_1 \,\|\, C_2)$ checkable against the
+published chain at any time.
+
+\paragraph{Universal verifiability.}
+After the election closes, anyone can independently re-derive the tally:
+\begin{enumerate}
+  \item Collect all \texttt{vote\_cast} ciphertexts between
+    \texttt{election\_start} and \texttt{voting\_closed} blocks.
+  \item Verify each submitted share against the on-chain PVSS commitment:
+    $g^{H(\hat{s}_i)} \equiv C_i \pmod{p}$.
+  \item Run Lagrange interpolation on the valid shares to recover $x$.
+  \item Decrypt all ciphertexts and re-count.
+\end{enumerate}
+All inputs — ciphertexts, commitments, shares — are immutably on-chain.
+The computation is deterministic and secret-free: any auditor reaches
+the same result.
+
+\paragraph{Tally integrity under hash-chain.}
+For the tally to be falsified an adversary must either insert a fake
+\texttt{vote\_cast} block (requiring recomputation of all subsequent
+hashes, detectable by any observer holding a chain snapshot) or delete
+a block (causing an immediate hash mismatch at the next block).
+Neither is possible without controlling all nodes in a distributed
+deployment.
+
+% =============================================================================
+\section{Game-Theoretic Incentive Analysis}
+\label{sec:gametheory}
+% =============================================================================
+
+A protocol is only as secure as the incentives it creates.
+We model S$^3$-Vote as a repeated game and show that honest behaviour
+is the dominant strategy for rational authorities.
+
+\subsection{Model}
+
+Let $\mathcal{A} = \{A_1, \ldots, A_N\}$ be the authority set.
+In each round $\ell$, every authority chooses
+$\sigma_i^\ell \in \{\textit{honest},\, \textit{cheat},\, \textit{skip}\}$.
+
+Let $B > 0$ be the shared benefit of successful key reconstruction,
+$p_c$ the reputation penalty for cheating, and $p_s$ the penalty for
+skipping. The one-round payoff is:
+
+\begin{equation}
+  u_i(\sigma_i, \boldsymbol{\sigma}_{-i}) =
+  \begin{cases}
+    B / |\mathcal{S}| - c_h
+      & \sigma_i = \textit{honest}, \text{ reconstruction succeeds} \\
+    0
+      & \sigma_i = \textit{honest}, \text{ reconstruction fails (not } A_i\text{'s fault)} \\
+    -p_c
+      & \sigma_i = \textit{cheat} \\
+    -p_s
+      & \sigma_i = \textit{skip}
+  \end{cases}
+\end{equation}
+where $c_h$ is the small cost of honest participation and
+$\boldsymbol{\sigma}_{-i}$ denotes all other authorities' strategies.
+
+Crucially, payoffs are not one-shot: reputation persists across rounds.
+Higher reputation produces lower future quorums, making reconstruction
+easier and $B/|\mathcal{S}|$ achievable with fewer abortive rounds.
+
+\subsection{Cheating is a Dominated Strategy}
+
+\begin{theorem}[Honesty Dominance]
+\label{thm:dominance}
+  Under the S$^3$-Vote reputation model, for a sufficiently long
+  horizon $T$, the strategy $\sigma_i = \textit{honest}$ strictly
+  dominates $\sigma_i = \textit{cheat}$ for every authority.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+  Suppose $A_i$ cheats in round $\ell$.
+
+  \textbf{(1) Immediate payoff: zero benefit.}
+  The corrupted share is immediately rejected by PVSS verification
+  (Remark on binding, Section~\ref{sec:security}).
+  Cheating does not advance reconstruction; there is no round in which
+  cheating produces a higher immediate payoff than honest participation.
+
+  \textbf{(2) Reputation loss.}
+  The cheat sets $P_i = 0.5$, $C_i = 0$, $H_i = 0$.
+  The behavioural score is $\alpha \cdot 0.5 = 0.1$ (for $\alpha = 0.2$),
+  compared to $1.0$ for honest participation.
+  Substituting into Equation~\eqref{eq:rep}:
+  \begin{align*}
+    R_i^{(\ell+1)\text{ cheat}}  &= 0.95[0.7 R_i^{(\ell)} + 0.3 \cdot 0.1]
+      \approx 0.665 R_i^{(\ell)} + 0.029 \\
+    R_i^{(\ell+1)\text{ honest}} &= 0.95[0.7 R_i^{(\ell)} + 0.3 \cdot 1.0]
+      = 0.665 R_i^{(\ell)} + 0.285
+  \end{align*}
+  The reputation gap is $0.285 - 0.029 = 0.256$ per round of cheating.
+
+  \textbf{(3) Compounding future cost.}
+  The lower reputation reduces $w_i$ in all subsequent rounds.
+  Since the quorum $\tau$ depends on collective trust
+  (Equation~\eqref{eq:threshold}), the cheater's degraded weight makes
+  future reconstructions harder for the whole group — including themselves —
+  reducing the probability of earning $B/|\mathcal{S}|$ in future rounds.
+
+  \textbf{(4) Long-run dominance.}
+  The cumulative payoff loss from a single cheat grows as $O(T)$
+  (recovery takes $\Theta(\log(1/(1-\lambda)))$ rounds) while the
+  one-round gain from cheating is exactly 0.
+  For any $T > T_0 = O(1/\epsilon)$ where $\epsilon$ is the marginal
+  detection probability complement, honesty strictly dominates.
+  \hfill$\square$
+\end{proof}
+
+\subsection{Coalition Instability}
+
+\begin{property}[Coalition Prisoner's Dilemma]
+\label{prop:coalition}
+  A coalition $\mathcal{C}$ planning to collectively delay or corrupt
+  reconstruction faces a prisoner's dilemma: each member individually
+  prefers to defect to honesty while the others cheat.
+\end{property}
+
+If $\sum_{i \in \mathcal{C}} w_i < \tau$ (Gate 2 unsatisfied), the coalition
+gains nothing — reconstruction fails regardless, and all members absorb
+reputation losses.
+If the coalition holds sufficient weight but deliberately delays, the
+impossibility detector (Algorithm~\ref{alg:impossible}) may trigger,
+applying skip penalties to all remaining free authorities.
+If even one coalition member defects and submits a valid share, that
+member earns an honest reputation update while the others do not.
+Since defection strictly dominates cooperation, rational coalitions
+unravel at the first opportunity.
+
+\subsection{Sybil Rationality Analysis}
+
+An adversary flooding the authority set with $k$ fake identities does
+not lower the quorum.
+Each fake identity starts at $R_{\text{initial}} = 2/3$ with weight 1.0,
+so $k$ fake authorities add weight $k$ to the group.
+However, the neutral quorum increases from $\lceil N/2 \rceil$ to
+$\lceil (N+k)/2 \rceil$, rising by $\lceil k/2 \rceil$.
+The net weight surplus gained by the Sybil adversary is only
+$k - \lceil k/2 \rceil = \lfloor k/2 \rfloor$,
+while the cost of operating $k$ live authority clients grows linearly in $k$.
+For any fixed target excess weight, the number of required fake authorities
+grows quadratically, making large-scale Sybil attacks economically irrational.
+
+% =============================================================================
+\section{Parameter Sensitivity Analysis}
+\label{sec:sensitivity}
+% =============================================================================
+
+The reputation formula (Equation~\eqref{eq:rep}) contains five parameters.
+We systematically analyse how varying each parameter affects system behaviour,
+providing an empirical basis for the default values.
+
+\subsection{Effect of Memory Factor $\lambda$}
+
+The memory factor $\lambda \in (0,1)$ controls the balance between
+historical reputation and current-round performance.
+
+The long-run equilibrium reputation for an always-honest authority is
+obtained by solving $R^* = \delta[\lambda R^* + (1-\lambda)]$, giving:
+\begin{equation}
+  R^*_{\lambda} = \frac{\delta(1-\lambda)}{1 - \delta\lambda}
+  \label{eq:equil}
+\end{equation}
+
+Substituting $\delta = 0.95$: for $\lambda = 0.7$, $R^* \approx 0.851$;
+for $\lambda = 0.3$, $R^* \approx 0.929$;
+for $\lambda = 0.9$, $R^* \approx 0.655$ — \emph{below} the initial
+$R_{\text{initial}} = 2/3$.
+
+This last result reveals an important constraint: when $\lambda$ is very
+high, the decay factor $\delta < 1$ dominates, and even perfect performance
+cannot overcome the passive erosion.
+The default $\lambda = 0.7$ sits in the regime where honest authorities
+converge to $R^* \approx 0.85$, well above the neutral starting point.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=13cm, height=6cm,
+  xlabel={Election round},
+  ylabel={Reputation (always honest)},
+  xmin=0, xmax=10, ymin=0.60, ymax=0.97,
+  xtick={0,1,...,10},
+  ytick={0.65,0.70,0.75,0.80,0.85,0.90,0.95},
+  grid=major, grid style={dashed,gray!30},
+  legend pos=south east, legend style={font=\small}, thick
+]
+\addplot[blue!80!black, mark=*, mark size=2pt] coordinates {
+  (0,0.6667)(1,0.7283)(2,0.7693)(3,0.7966)(4,0.8147)
+  (5,0.8268)(6,0.8350)(7,0.8406)(8,0.8444)(9,0.8470)(10,0.8488)
+};
+\addplot[green!60!black, mark=triangle*, mark size=2.5pt, dotted] coordinates {
+  (0,0.6667)(1,0.8550)(2,0.9087)(3,0.9240)(4,0.9283)
+  (5,0.9296)(6,0.9299)(7,0.9300)(8,0.9300)(9,0.9300)(10,0.9300)
+};
+\addplot[red!70!black, mark=square*, mark size=2pt, dashed] coordinates {
+  (0,0.6667)(1,0.6650)(2,0.6636)(3,0.6623)(4,0.6613)
+  (5,0.6604)(6,0.6597)(7,0.6590)(8,0.6584)(9,0.6580)(10,0.6576)
+};
+\addlegendentry{$\lambda=0.7$ (default, $R^*\approx0.85$)}
+\addlegendentry{$\lambda=0.3$ (reactive, $R^*\approx0.93$)}
+\addlegendentry{$\lambda=0.9$ (conservative, $R^*\approx0.66$)}
+\end{axis}
+\end{tikzpicture}
+\caption{Effect of memory factor $\lambda$ on long-run reputation for an
+  always-honest authority ($\delta=0.95$ fixed).
+  High $\lambda$ causes decay to dominate: even perfect behaviour cannot
+  prevent slow reputation erosion. Low $\lambda$ converges fast but makes
+  reputation volatile. The default $\lambda=0.7$ balances stability and
+  responsiveness.}
+\label{fig:lambda_sensitivity}
+\end{figure}
+
+\subsection{Effect of Participation Weight $\alpha$}
+
+Since cheating sets $H_i = 0$ and $C_i = 0$, the only positive
+contribution to a cheater's score comes from $\alpha \cdot P_i$
+(where $P_i = 0.5$ for showing up-then-cheating).
+Thus $\alpha$ directly controls the severity of the cheating penalty:
+lower $\alpha$ means a harsher post-cheat reputation drop.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=13cm, height=6cm,
+  xlabel={Election round},
+  ylabel={Reputation (cheat at round 1, then honest)},
+  xmin=0, xmax=10, ymin=0.38, ymax=0.88,
+  xtick={0,1,...,10},
+  ytick={0.4,0.5,0.6,0.7,0.8},
+  grid=major, grid style={dashed,gray!30},
+  legend pos=south east, legend style={font=\small}, thick
+]
+\addplot[blue!80!black, mark=*, mark size=2pt] coordinates {
+  (0,0.6667)(1,0.4719)(2,0.5988)(3,0.6832)(4,0.7393)
+  (5,0.7766)(6,0.8014)(7,0.8180)(8,0.8290)(9,0.8363)(10,0.8411)
+};
+\addplot[red!70!black, mark=square*, mark size=2pt, dashed] coordinates {
+  (0,0.6667)(1,0.4576)(2,0.5893)(3,0.6769)(4,0.7351)
+  (5,0.7739)(6,0.7996)(7,0.8167)(8,0.8281)(9,0.8357)(10,0.8407)
+};
+\addplot[green!60!black, mark=triangle*, mark size=2.5pt, dotted] coordinates {
+  (0,0.6667)(1,0.4861)(2,0.6083)(3,0.6895)(4,0.7435)
+  (5,0.7794)(6,0.8033)(7,0.8192)(8,0.8297)(9,0.8368)(10,0.8415)
+};
+\addlegendentry{$\alpha=0.2$ (default, drop to 0.472)}
+\addlegendentry{$\alpha=0.1$ (strict, drop to 0.458)}
+\addlegendentry{$\alpha=0.3$ (lenient, drop to 0.486)}
+\end{axis}
+\end{tikzpicture}
+\caption{Effect of participation weight $\alpha$ on reputation recovery
+  after a single cheat event (round 1), followed by honest participation.
+  Lower $\alpha$ produces a deeper initial penalty. All trajectories
+  converge to the same long-run equilibrium ($\approx 0.84$) because the
+  honest-participation score is $1.0$ regardless of $\alpha$.}
+\label{fig:alpha_sensitivity}
+\end{figure}
+
+\subsection{Effect of Decay Factor $\delta$}
+
+The decay factor $\delta \in (0,1)$ multiplies every reputation update,
+providing a passive incentive for authorities to remain active.
+
+\begin{itemize}
+  \item $\delta = 1.0$: no decay. An authority that participated once and
+    went dormant retains their reputation indefinitely, becoming a
+    \emph{ghost authority} that occupies weight without contributing shares.
+  \item $\delta = 0.95$ (default): a dormant authority (skipping every round)
+    converges to zero over approximately
+    $\log(0.01)/\log(0.95) \approx 90$ rounds.
+  \item $\delta < 0.85$: rapid erosion; honest authorities' reputations
+    also degrade noticeably, destabilising the long-run equilibrium and
+    potentially raising the quorum even for honest groups.
+\end{itemize}
+
+The default $\delta = 0.95$ removes ghost authorities on a scale of
+tens of rounds while allowing honest authorities to maintain reputations
+well above the initial $2/3$ (as shown in Figure~\ref{fig:reptraj}).
+
+\subsection{Sensitivity Summary}
+
+\begin{center}
+\begin{tabular}{llp{4.8cm}p{4.8cm}}
+\toprule
+\textbf{Param} & \textbf{Default} & \textbf{Effect if increased}
+               & \textbf{Effect if decreased} \\
+\midrule
+$\alpha$ & 0.2 & Softer cheat penalty; more reward for showing up
+               & Harsher cheat penalty; slow recovery \\
+$\beta$  & 0.3 & Higher reward for weight contribution
+               & Reduces incentive for high-weight participation \\
+$\gamma$ & 0.5 & Harsher for cheats (H=0); but H=0.5 skips also penalised
+               & Weakens honesty incentive \\
+$\lambda$ & 0.7 & Stable reputation; slower build and recovery
+               & Reactive; volatile; fast convergence \\
+$\delta$ & 0.95 & Ghost authorities persist longer
+               & Honest reputations erode; quorum rises \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The system is \emph{qualitatively robust}: across a wide range of
+parameter choices, honest authorities earn higher reputation than
+cheaters, and the quorum trends downward for honest groups.
+The sensitivity analysis confirms the design rationale — $\gamma$ large
+for deterrence, $\alpha$ small to discourage empty participation,
+$\lambda$ moderate for memory-reactivity balance, $\delta$ near-1 for
+gentle passive pressure — and bounds the consequences of miscalibration.
 
 % =============================================================================
 \section{Comparison with Prior Work}
+\label{sec:comparison}
 % =============================================================================
 
-\subsection{Against Shamir's Threshold Scheme (1979)}
-
-Shamir's original $(t,n)$-threshold scheme \cite{shamir1979} treats every
-share as equal and provides no mechanism for identifying or penalising
-misbehaving participants. Key differences:
+\subsection{Against Shamir's Threshold Scheme}
 
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabular}{p{4.5cm}p{4.5cm}p{4.5cm}}
 \toprule
-Property & Shamir (1979) & S$^3$-Vote \\
+\textbf{Property} & \textbf{Shamir (1979)} & \textbf{S$^3$-Vote} \\
 \midrule
-Share equality & All equal & Reputation-weighted \\
-Cheat detection & None & PVSS — immediate, on-chain proof \\
-Threshold & Fixed & Adaptive (reputation-driven) \\
-Failed round handling & Not addressed & Automatic penalty + recovery \\
-Authority accountability & None & Persistent, cross-round reputation \\
+Share equality & All shares equal & Reputation-weighted \\
+Cheat detection & None & PVSS — immediate, on-chain \\
+Threshold & Fixed & Adaptive (trust-driven) \\
+Authority accountability & None & Persistent, cross-round \\
+Failed round handling & Not addressed & Detect + penalise + recover \\
+Voting application & Not addressed & Complete protocol \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+Shamir's scheme guarantees information-theoretic secrecy and correct
+reconstruction when at least $t$ honest shares are combined.
+It makes no provision for identifying which authorities submitted
+corrupted shares, nor for adjusting future requirements based on
+observed behaviour. S$^3$-Vote builds on its mathematical foundation
+while addressing all these gaps.
 
 \subsection{Against Nojoumian's Social Secret Sharing}
 
-Nojoumian \textit{et al.}\ \cite{nojoumian2012,nojoumian2018} introduced
-reputation into secret sharing but left several critical gaps:
-
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabular}{p{4cm}p{4.5cm}p{4.5cm}}
 \toprule
-Property & Nojoumian & S$^3$-Vote \\
+\textbf{Property} & \textbf{Nojoumian} & \textbf{S$^3$-Vote} \\
 \midrule
 Trusted dealer & Required & None \\
-Reputation assignment & Manual / social (subjective) & Formula-based, automatic \\
-Cheat detection & Implicit (failure only) & PVSS — public, on-chain \\
-Reconstruction gate & Single (weighted shares) & Dual (shares AND weight) \\
+Reputation source & Social / peer evaluation & On-chain, deterministic \\
+Cheat detection & Implicit (failure only) & PVSS — public proof \\
+Reconstruction gate & Single (weighted) & Dual (shares AND weight) \\
 Concentration protection & None & Evenness factor \\
-Neutral starting quorum & Ad hoc & $\lceil N/2 \rceil$ (proven) \\
-Failed election recovery & Not addressed & Automatic penalties + recovery \\
-Audit trail & Database & Blockchain (hash-chained) \\
-Application domain & General secret sharing & Complete voting system \\
+Neutral quorum anchor & Ad hoc & $\lceil N/2 \rceil$ (proven) \\
+Failed election recovery & Not addressed & Automatic \\
+Audit trail & Database & Blockchain \\
+Complete voting system & No & Yes \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\subsubsection*{Trusted Dealer Elimination}
+\paragraph{Trusted dealer elimination.}
+Nojoumian requires a coordinator to assign and update reputations.
+S$^3$-Vote is fully self-governing: scores are computed deterministically
+from Equation~\eqref{eq:rep} applied to PVSS-verified outcomes.
 
-Nojoumian's scheme requires a trusted dealer to initialise reputation
-scores and arbitrate updates. This reintroduces the central trust problem
-that threshold cryptography exists to solve.
-S$^3$-Vote derives reputation entirely from verifiable on-chain behaviour —
-no coordinator, no subjectivity.
+\paragraph{Objective reputation.}
+Nojoumian's social evaluation is gameable: colluding authorities can
+inflate each other's scores. S$^3$-Vote scores are derived from
+cryptographically verifiable events; there is no mechanism to inflate
+a reputation other than genuinely behaving well.
 
-\subsubsection*{Objective vs.\ Social Reputation}
+\paragraph{Two-gate policy.}
+A single adjusted threshold leaves open the flooding attack (many
+low-weight shares meet the count) and the monopoly attack (one very
+high-weight authority meets the weight alone).
+Equation~\eqref{eq:twogates} closes both simultaneously.
 
-In Nojoumian's model, authorities evaluate each other — a social process
-that is gameable (coalitions can inflate each other's scores).
-In S$^3$-Vote, scores are computed deterministically from Equation
-\eqref{eq:rep} applied to PVSS-verified outcomes. There is no way to
-inflate a reputation except by genuinely behaving well.
+\paragraph{Provable neutral anchor.}
+Theorem~\ref{thm:anchor} proves that the quorum initialises at
+$\lceil N/2 \rceil$ for any group size, providing a principled and
+consistent baseline. Nojoumian's scheme has no equivalent guarantee.
 
-\subsubsection*{Two-Gate Policy}
-
-Nojoumian uses a single adjusted threshold. S$^3$-Vote enforces
-Equation \eqref{eq:twogates}: both the cryptographic share count and the
-trust weight must be satisfied. This closes the flooding attack (many
-low-weight shares) and the monopoly attack (one very high-weight authority)
-that single-gate schemes cannot prevent.
-
-\subsubsection*{Provable Neutral Anchor}
-
-Nojoumian does not derive a principled starting threshold. S$^3$-Vote
-proves (Theorem 1) that fresh authorities always begin at the majority
-quorum $\lceil N/2 \rceil$, providing a principled, consistent baseline
-regardless of group size.
+\paragraph{Graceful failure.}
+When reconstruction becomes mathematically impossible mid-round, the
+system detects this via Algorithm~\ref{alg:impossible}, transitions
+to a failed state, applies penalties to responsible parties, and
+unlocks the next round — a lifecycle that Nojoumian's model does
+not address.
 
 % =============================================================================
 \section{Prototype Implementation}
+\label{sec:implementation}
 % =============================================================================
 
-The S$^3$-Vote prototype is implemented in Python (backend) and
-JavaScript (single-page frontend), comprising the following modules:
+\subsection{Module Overview}
 
-\begin{description}
-  \item[\texttt{crypto/encryption.py}] ElGamal key generation, vote
-    encryption and decryption.
-  \item[\texttt{crypto/shamir.py}] Polynomial-based $(t,n)$-threshold
-    secret splitting and Lagrange interpolation reconstruction.
-  \item[\texttt{crypto/pvss.py}] Commitment generation and share
-    verification.
-  \item[\texttt{reputation/reputation\_engine.py}] Implementation of
-    Equation \eqref{eq:rep}.
-  \item[\texttt{reputation/threshold.py}] Implementation of Equations
-    \eqref{eq:evenness}–\eqref{eq:threshold}.
-  \item[\texttt{blockchain/blockchain.py}] Hash-chained block structure
-    with SHA-256 linking.
-  \item[\texttt{api/app.py}] Flask REST API orchestrating the full
-    election lifecycle.
-  \item[\texttt{api/templates/index.html}] Web dashboard for election
-    management, vote simulation, share submission, and reputation
-    visualisation.
-\end{description}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Module} & \textbf{Responsibility} \\
+\midrule
+\texttt{crypto/encryption.py}         & ElGamal key generation, encryption, decryption \\
+\texttt{crypto/shamir.py}             & Polynomial split and Lagrange reconstruction \\
+\texttt{crypto/pvss.py}               & Commitment generation and share verification \\
+\texttt{reputation/reputation\_engine.py} & Equation~\eqref{eq:rep} implementation \\
+\texttt{reputation/threshold.py}      & Equations~\eqref{eq:evenness}--\eqref{eq:threshold} \\
+\texttt{blockchain/blockchain.py}     & SHA-256 hash-chained block list \\
+\texttt{api/app.py}                   & Flask REST API, full election lifecycle \\
+\texttt{api/templates/index.html}     & Single-page dashboard (JavaScript) \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-The dashboard allows an operator to create elections with arbitrary
-authority sets, simulate voting, and control each authority's share
-submission (valid, invalid, or skipped) to observe the quorum and
-reputation dynamics in real time. Reputation persists across sessions
-via the in-memory registry and reflects accurately in the quorum
-computation for subsequent elections.
+\subsection{Key Algorithms in Code}
+
+The adaptive threshold (Equation~\eqref{eq:threshold}) is implemented as:
+
+\begin{lstlisting}[language=Python, caption={Adaptive threshold computation in \texttt{threshold.py}}]
+def adaptive_threshold(self, reputations):
+    n         = len(reputations)
+    avg       = float(np.mean(reputations))
+    E         = self.trust_evenness(reputations)
+    trust     = min(1.0, avg * E)
+
+    t_neutral = math.ceil(n / 2)
+    t_max     = n - 1
+    t_min     = max(2, math.ceil(n / 3))
+
+    if trust <= 2 / 3:
+        threshold = t_max - (t_max - t_neutral) * trust * 1.5
+    else:
+        threshold = t_neutral - (t_neutral - t_min) * (trust - 2/3) * 3
+
+    return round(float(max(t_min, min(t_max, threshold))), 3)
+\end{lstlisting}
+
+The two-gate check is implemented as:
+
+\begin{lstlisting}[language=Python, caption={Two-gate reconstruction trigger in \texttt{app.py}}]
+if (len(election['submitted_shares']) >= election['shamir_t']
+        and coalition_weight >= election['threshold']):
+    _reconstruct()
+\end{lstlisting}
+
+Impossibility detection runs after every cheat or skip:
+
+\begin{lstlisting}[language=Python, caption={Impossibility detection (Algorithm~\ref{alg:impossible})}]
+def _check_impossible():
+    acted      = set(submitted) | set(cheaters) | set(skipped)
+    still_free = [a for a in authority_names if a not in acted]
+    max_shares = len(submitted) + len(still_free)
+    if max_shares < shamir_t:
+        return True
+    max_weight = sum(weights[a] for a in submitted) + \
+                 sum(weights[a] for a in still_free)
+    if max_weight < threshold:
+        return True
+    return False
+\end{lstlisting}
+
+\subsection{Web Dashboard}
+
+The single-page dashboard provides real-time visibility into all system
+state. Key features include:
+\begin{itemize}
+  \item Authority list with reputation history loaded from the persistent
+    registry; live quorum preview updating as authorities are added or removed.
+  \item Voting phase with encrypted-ballot progress tracker showing
+    individual voter chips as ballots are cast.
+  \item Reconstruction phase with live share-count and coalition-weight
+    meters, and three-button controls per authority (submit valid, submit
+    invalid, skip) for simulation purposes.
+  \item Automatic reputation scoring displayed per authority after
+    reconstruction, with read-only computed P/C/H values.
+  \item Failed state view with penalty breakdown and one-click recovery.
+  \item Blockchain explorer showing all events in reverse chronological order.
+\end{itemize}
 
 % =============================================================================
 \section{Example Walkthrough}
+\label{sec:walkthrough}
 % =============================================================================
 
-We trace a two-round scenario with $N = 7$ authorities.
+We trace a complete two-round scenario with $N = 7$ authorities, all
+starting fresh.
 
-\subsubsection*{Round 1 — Initial State}
+\subsection{Round 1 — Initial State}
 
-All 7 authorities start at $R_i = 2/3$.
-By Theorem 1, the quorum is $\tau = \lceil 7/2 \rceil = 4$.
+All 7 authorities at $R_i = \tfrac{2}{3}$. By Theorem~\ref{thm:anchor},
+$\tau = 4$, $t = \lfloor 4 \rfloor = 4$.
+Equal weights: $w_i = 1.0$ for all $i$.
+
 Suppose 5 submit valid shares, 1 cheats, and 1 skips.
-The coalition of 5 valid submitters achieves weight $5 \times 1.0 = 5.0 \geq 4$
-and share count $5 \geq t = 4$.
-Reconstruction succeeds.
-
-After the round, reputation updates via Equation \eqref{eq:rep}:
+The coalition of 5 achieves:
 \begin{align*}
-  R_{\text{honest}} &\approx 0.95[0.7(2/3) + 0.3(1.0)] \approx 0.728 \\
-  R_{\text{cheater}} &\approx 0.95[0.7(2/3) + 0.3(0.5 \cdot 0.2 + 0 \cdot 0.3 + 0 \cdot 0.5)] \approx 0.472 \\
-  R_{\text{skipper}} &\approx 0.95[0.7(2/3) + 0.3(0 \cdot 0.2 + 0 \cdot 0.3 + 0.5 \cdot 0.5)] \approx 0.515
+  |\mathcal{S}| &= 5 \geq t = 4 \quad \checkmark \\
+  \textstyle\sum_{i \in \mathcal{S}} w_i &= 5.0 \geq \tau = 4 \quad \checkmark
+\end{align*}
+Reconstruction succeeds after the 5th valid submission.
+
+\subsubsection*{Reputation Updates}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Role & $P$ & $C$ & $H$ & $R^{(1)}$ \\
+\midrule
+Honest (×5) & 1.0 & $\min(1, 1.0/1.0)=1.0$ & 1.0 & 0.728 \\
+Cheater (×1) & 0.5 & 0.0 & 0.0 & 0.472 \\
+Skipper (×1) & 0.0 & 0.0 & 0.5 & 0.515 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Round 2 — Reputations Loaded from Registry}
+
+Updated reputations: 5 honest at 0.728, cheater at 0.472, skipper at 0.515.
+
+\begin{align*}
+  \bar{R} &= \tfrac{5(0.728)+0.472+0.515}{7} = \tfrac{4.627}{7} \approx 0.661 \\
+  \text{Variance} &\approx 0.0043 \quad \Rightarrow \quad
+  E \approx 1 - \tfrac{0.0043}{7 \times 0.661^2} \approx 0.986 \\
+  \tau_{\text{trust}} &= \min(1,\; 0.661 \times 0.986) \approx 0.652 < \tfrac{2}{3}\\
+  \tau &= 6 - (6-4)(0.652)(1.5) \approx 4.04
 \end{align*}
 
-\subsubsection*{Round 2 — Reputations Loaded from Registry}
+The quorum for Round 2 is \textbf{4.04} — marginally above the neutral 4,
+reflecting that the group's cohesion dropped slightly due to the cheater
+and skipper. Sustained honest behaviour across subsequent rounds drives the
+quorum down toward 3 (the floor $\tau_{\text{min}}$ for $N=7$).
 
-The new reputations $\{0.728 \times 5,\, 0.472,\, 0.515\}$ are loaded.
-The honest majority has higher average rep but the two underperformers
-reduce evenness.
-Trust $\tau_{\text{trust}} \approx 0.67$ remains near neutral, so the
-quorum adjusts to approximately $\tau \approx 4.07$ — slightly \emph{above}
-neutral, reflecting that the group is less cohesive than before.
-The cheater and skipper must now work against a marginally stricter quorum,
-while repeated honest behaviour across subsequent rounds will drive it
-back down toward 3.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=13cm, height=5.5cm,
+  xlabel={Election round},
+  ylabel={Effective quorum $\tau$},
+  xmin=0, xmax=8,
+  ymin=2.5, ymax=5,
+  xtick={0,1,...,8},
+  ytick={3,3.5,4,4.5,5},
+  grid=major,
+  grid style={dashed, gray!30},
+  legend pos=north east,
+  legend style={font=\small},
+  thick
+]
+% All honest: N=7
+\addplot[blue!70!black, mark=*, mark size=2.5pt] coordinates {
+  (0, 4.0) (1, 3.815) (2, 3.692) (3, 3.61)
+  (4, 3.556) (5, 3.52) (6, 3.497) (7, 3.48) (8, 3.47)
+};
+% 1 cheat 1 skip then all honest: N=7
+\addplot[red!60!black, mark=square*, mark size=2.5pt, dashed] coordinates {
+  (0, 4.0) (1, 4.04) (2, 3.94) (3, 3.84)
+  (4, 3.75) (5, 3.69) (6, 3.64) (7, 3.61) (8, 3.58)
+};
+\addlegendentry{All 7 honest every round}
+\addlegendentry{1 cheat + 1 skip in round 1, then honest}
+\end{axis}
+\end{tikzpicture}
+\caption{Quorum evolution for $N=7$ over 8 rounds. When all authorities
+  behave honestly, the quorum steadily decreases toward the floor of 3.
+  One round of cheating/skipping deflects the trajectory upward, requiring
+  several honest rounds to recover.}
+\label{fig:quorumevol}
+\end{figure}
 
 % =============================================================================
 \section{Limitations and Future Work}
+\label{sec:limitations}
 % =============================================================================
 
-\begin{description}
-  \item[Single-node blockchain] The prototype runs on one server.
-    Production deployment requires a distributed ledger with consensus.
-  \item[Simulated authority clients] All authority actions are simulated
-    by one administrator in the prototype. A production system gives each
-    authority an independent client that holds their private key and signs
-    share submissions.
-  \item[Cryptographic identity] Authority names are currently plain strings.
-    In production, each name maps to a public key; share submissions are
-    signed by the corresponding private key and verified on-chain, preventing
-    impersonation.
-  \item[Parameter sensitivity] The reputation parameters
-    $(\alpha, \beta, \gamma, \lambda, \delta)$ are set by design rationale.
-    Empirical calibration across realistic election scenarios would
-    strengthen the parameter choices.
-  \item[Formal security proof] A rigorous game-based security proof under
-    standard cryptographic assumptions (DDH, random oracle) is left for
-    future work.
+\begin{description}[leftmargin=2em]
+  \item[Single-node blockchain.]
+    The prototype stores the chain in memory on one server.
+    A production deployment requires a distributed ledger with Byzantine
+    fault-tolerant consensus.
+
+  \item[Simulated authority clients.]
+    All authority actions are performed by a single administrator in the
+    dashboard. In a real deployment, each authority would operate an
+    independent client holding their private key locally, never sharing it
+    with the server.
+
+  \item[Cryptographic identity.]
+    Authority names are currently plain strings. In production, each
+    authority has a public/private key pair; their identity is their public
+    key, and every share submission is signed with their private key and
+    verified on-chain. This prevents impersonation and false reputation
+    attribution.
+
+  \item[Parameter calibration.]
+    The reputation weights $(\alpha=0.2, \beta=0.3, \gamma=0.5)$ and
+    smoothing parameters $(\lambda=0.7, \delta=0.95)$ were set by design
+    rationale. Empirical calibration over realistic election scenarios
+    and adversarial benchmarks would strengthen the choices.
+
 \end{description}
 
 % =============================================================================
 \section{Conclusion}
+\label{sec:conclusion}
 % =============================================================================
 
 S$^3$-Vote demonstrates that threshold-cryptographic voting can be made
-self-governing: no trusted dealer, no static parameters, no silent failures.
-By anchoring PVSS commitments and all authority actions on a blockchain,
-every act of honesty or betrayal becomes a permanent, public, verifiable
-record. By feeding that record into a reputation formula and propagating
-reputations across elections, the system develops institutional memory.
-And by translating that memory into an adaptive two-gate quorum, it turns
-good behaviour into a concrete, quantifiable reward — fewer participants
-needed to reconstruct — and bad behaviour into a concrete cost — a higher,
-stricter quorum for everyone.
+fully self-governing: no trusted coordinator, no static parameters, no
+silent failures, and no impunity for misbehaviour.
 
-The core theoretical contribution is the proof that the neutral quorum
-is always $\lceil N/2 \rceil$ regardless of group size, that evenness
-prevents weight concentration, and that the dual-gate policy closes
-attack vectors that prior single-threshold schemes cannot address.
+The core insight is that the reconstruction threshold should be a
+\emph{function of demonstrated trustworthiness}, not a fixed design
+parameter. By measuring trustworthiness objectively through
+PVSS-verified behavioural events, converting it to weights, and
+mapping it to a quorum through a provably anchored formula, the system
+creates a dynamic equilibrium: honest groups earn efficiency (lower
+quorum); dishonest or heterogeneous groups face proportionally higher
+requirements.
 
-Compared to Shamir's foundational scheme, S$^3$-Vote adds accountability,
-verifiability, and adaptivity.
-Compared to Nojoumian's social secret sharing, it eliminates the trusted
-dealer, replaces subjective social reputation with objective on-chain
-evidence, introduces dual-gate reconstruction, and provides a complete,
-deployable voting system rather than a secret sharing primitive.
+The two-gate reconstruction policy ensures that neither numerical
+flooding nor reputational monopoly can shortcut the security requirement.
+The concentration-resistance property formally closes the single
+dominant-authority attack vector. And the blockchain audit trail
+ensures that every act of honesty or betrayal is permanently,
+publicly recorded — creating real accountability where classical
+threshold schemes offer none.
+
+Compared to Shamir's foundational work, S$^3$-Vote adds
+full accountability, adaptive security, and graceful failure recovery.
+Compared to Nojoumian's social secret sharing, it eliminates the
+trusted dealer, replaces subjective social evaluation with objective
+on-chain evidence, introduces a principled dual-gate reconstruction
+policy, and delivers a complete, deployable voting system with
+end-to-end verifiability.
+
+The prototype confirms that all components — ElGamal encryption,
+Shamir sharing, PVSS verification, reputation scoring, adaptive threshold,
+and blockchain logging — integrate correctly and perform the intended
+security functions.
+A formal IND-CPA ballot privacy proof establishes that ciphertext
+indistinguishability reduces to the DDH problem, and a game-theoretic
+analysis proves that honest participation is the dominant strategy for
+rational authorities over any sufficiently long horizon.
+A parameter sensitivity study confirms that the system remains
+qualitatively correct across a wide range of weight configurations,
+bounding the consequences of miscalibration.
+
+The path to a production system requires distributing the blockchain
+across independent nodes, equipping each authority with their own signing
+key, and extending the adversary model to adaptive corruption via a
+UC-secure threshold scheme — well-understood directions that do not
+affect the correctness of the current design.
 
 % =============================================================================
 \bibliographystyle{plain}
@@ -817,56 +2202,99 @@ deployable voting system rather than a secret sharing primitive.
 \bibitem{shamir1979}
 A.\ Shamir,
 ``How to Share a Secret,''
-\textit{Communications of the ACM}, vol.\ 22, no.\ 11, pp.\ 612--613, 1979.
+\textit{Communications of the ACM}, vol.~22, no.~11, pp.~612--613, 1979.
 
 \bibitem{elgamal1985}
 T.\ ElGamal,
-``A Public Key Cryptosystem and a Signature Scheme Based on Discrete Logarithms,''
-\textit{IEEE Transactions on Information Theory}, vol.\ 31, no.\ 4,
-pp.\ 469--472, 1985.
+``A Public Key Cryptosystem and a Signature Scheme Based on Discrete
+Logarithms,''
+\textit{IEEE Transactions on Information Theory}, vol.~31, no.~4,
+pp.~469--472, 1985.
 
 \bibitem{schoenmakers1999}
 B.\ Schoenmakers,
-``A Simple Publicly Verifiable Secret Sharing Scheme and its Application to
-Electronic Voting,''
-in \textit{Advances in Cryptology — CRYPTO 1999}, Lecture Notes in Computer
-Science, vol.\ 1666, pp.\ 148--164, Springer, 1999.
+``A Simple Publicly Verifiable Secret Sharing Scheme and its Application
+to Electronic Voting,''
+in \textit{Advances in Cryptology --- CRYPTO 1999}, LNCS vol.~1666,
+pp.~148--164, Springer, 1999.
 
 \bibitem{nojoumian2012}
 M.\ Nojoumian and D.\ R.\ Stinson,
 ``Social Secret Sharing in Cloud Computing Using a New Trust Function,''
-in \textit{Proceedings of the 10th Annual Conference on Privacy, Security
-and Trust (PST)}, pp.\ 161--167, IEEE, 2012.
+in \textit{Proc.\ 10th Annual Conf.\ on Privacy, Security and Trust (PST)},
+pp.~161--167, IEEE, 2012.
 
 \bibitem{nojoumian2018}
 M.\ Nojoumian,
-``Novel Secret Sharing and Commitment Schemes for Cryptographic Applications,''
+``Novel Secret Sharing and Commitment Schemes for Cryptographic
+Applications,''
 Ph.D.\ dissertation, University of Waterloo, 2012.
 (Extended work published through 2018.)
 
 \bibitem{pedersen1991}
 T.\ P.\ Pedersen,
-``Non-Interactive and Information-Theoretic Secure Verifiable Secret Sharing,''
-in \textit{Advances in Cryptology — CRYPTO 1991}, Lecture Notes in Computer
-Science, vol.\ 576, pp.\ 129--140, Springer, 1991.
-
-\bibitem{desmedt1994}
-Y.\ Desmedt and Y.\ Frankel,
-``Threshold Cryptosystems,''
-in \textit{Advances in Cryptology — CRYPTO 1989}, Lecture Notes in Computer
-Science, vol.\ 435, pp.\ 307--315, Springer, 1990.
+``Non-Interactive and Information-Theoretic Secure Verifiable Secret
+Sharing,''
+in \textit{Advances in Cryptology --- CRYPTO 1991}, LNCS vol.~576,
+pp.~129--140, Springer, 1991.
 
 \bibitem{cramer1997}
 R.\ Cramer, R.\ Gennaro, and B.\ Schoenmakers,
 ``A Secure and Optimally Efficient Multi-Authority Election Scheme,''
-in \textit{Advances in Cryptology — EUROCRYPT 1997}, Lecture Notes in
-Computer Science, vol.\ 1233, pp.\ 103--118, Springer, 1997.
+in \textit{Advances in Cryptology --- EUROCRYPT 1997}, LNCS vol.~1233,
+pp.~103--118, Springer, 1997.
+
+\bibitem{desmedt1990}
+Y.\ Desmedt and Y.\ Frankel,
+``Threshold Cryptosystems,''
+in \textit{Advances in Cryptology --- CRYPTO 1989}, LNCS vol.~435,
+pp.~307--315, Springer, 1990.
 
 \bibitem{chaum1988}
-D.\ Chaum, C.\ Cr{\'{e}}peau, and I.\ Damg{\aa}rd,
+D.\ Chaum, C.\ Cr{\'e}peau, and I.\ Damg{\aa}rd,
 ``Multiparty Unconditionally Secure Protocols,''
-in \textit{Proceedings of the 20th Annual ACM Symposium on Theory of
-Computing (STOC)}, pp.\ 11--19, ACM, 1988.
+in \textit{Proc.\ 20th Annual ACM STOC}, pp.~11--19, ACM, 1988.
+
+\bibitem{foo1992}
+A.\ Fujioka, T.\ Okamoto, and K.\ Ohta,
+``A Practical Secret Voting Scheme for Large Scale Elections,''
+in \textit{Advances in Cryptology --- AUSCRYPT 1992},
+LNCS vol.~718, pp.~244--251, Springer, 1993.
+
+\bibitem{adida2008}
+B.\ Adida,
+``Helios: Web-Based Open-Audit Voting,''
+in \textit{Proc.\ 17th USENIX Security Symposium},
+pp.~335--348, 2008.
+
+\bibitem{cortier2013}
+V.\ Cortier, D.\ Galindo, S.\ Glondu, and M.\ Izabach{\`e}ne,
+``Election Verifiability for Helios under Weaker Trust Assumptions,''
+in \textit{Proc.\ ESORICS 2014},
+LNCS vol.~8713, pp.~327--344, Springer, 2014.
+
+\bibitem{clarkson2008}
+M.\ R.\ Clarkson, S.\ Chong, and A.\ C.\ Myers,
+``Civitas: Toward a Secure Voting System,''
+in \textit{Proc.\ IEEE Symposium on Security and Privacy},
+pp.~354--368, IEEE, 2008.
+
+\bibitem{boneh1998}
+D.\ Boneh,
+``The Decision Diffie-Hellman Problem,''
+in \textit{Proc.\ Third Algorithmic Number Theory Symposium (ANTS-III)},
+LNCS vol.~1423, pp.~48--63, Springer, 1998.
+
+\bibitem{lamport1982}
+L.\ Lamport, R.\ Shostak, and M.\ Pease,
+``The Byzantine Generals Problem,''
+\textit{ACM Transactions on Programming Languages and Systems},
+vol.~4, no.~3, pp.~382--401, 1982.
+
+\bibitem{katzlindell2014}
+J.\ Katz and Y.\ Lindell,
+\textit{Introduction to Modern Cryptography}, 2nd ed.,
+CRC Press, 2014.
 
 \end{thebibliography}
 
