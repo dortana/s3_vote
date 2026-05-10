@@ -96,7 +96,7 @@
       outline: none; transition: border-color .15s;
     }
     .form-group input:focus { border-color: var(--accent); }
-    .option-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .option-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
     .option-row input { flex: 1; }
     .btn-icon {
       background: none; border: 1px solid var(--border); color: var(--muted);
@@ -363,7 +363,7 @@
     <div class="card">
       <div class="card-header">
         <h2>👥 Authorities</h2>
-        <span id="next-threshold-label" style="font-size:12px;color:var(--muted);">Effective quorum: —</span>
+        <span id="next-threshold-label" style="font-size:12px;color:var(--muted);">Effective threshold: —</span>
       </div>
       <div class="card-body" id="auth-list" style="padding:14px 18px;"></div>
     </div>
@@ -497,10 +497,10 @@ function htmlIdle(state) {
           <span style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Authorities</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <span id="auth-count-badge" style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-weight:600;"></span>
-            <span id="auth-chevron" style="color:var(--muted);font-size:12px;">▲</span>
+            <span id="auth-chevron" style="color:var(--muted);font-size:12px;">▼</span>
           </div>
         </div>
-        <div id="auth-collapse" style="display:block;margin-top:8px;">
+        <div id="auth-collapse" style="display:none;margin-top:8px;">
           <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Known authorities load their reputation history automatically. New ones start neutral.</p>
           <div id="auth-input-list"></div>
           <button class="btn-add" onclick="addAuthorityInput()">+ Add Authority</button>
@@ -580,12 +580,17 @@ function addAuthorityInput(name = '', rep = null) {
   const row  = document.createElement('div');
   row.className = 'option-row';
   const badge = rep !== null
-    ? `<span style="font-size:11px;padding:3px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--muted);white-space:nowrap;">rep ${rep.toFixed(2)}</span>`
-    : `<span style="font-size:11px;padding:3px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--yellow);white-space:nowrap;">new</span>`;
+    ? `<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:62px;padding:4px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);line-height:1.2;">
+        <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;">rep</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text);">${rep.toFixed(2)}</span>
+       </span>`
+    : `<span style="display:flex;align-items:center;justify-content:center;min-width:62px;padding:4px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--yellow);">
+        <span style="font-size:12px;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px;font-weight:700;">new</span>
+       </span>`;
   row.innerHTML = `
-    <input type="text" placeholder="Authority name" value="${name}" oninput="updateAuthBadge(); liveRenderIdleAuthorities();" />
+    <input type="text" placeholder="Authority name" value="${name}" oninput="updateAuthBadge(); liveRenderIdleAuthorities();" style="align-self:center;" />
     ${badge}
-    <button class="btn-icon" onclick="removeAuthorityInput(this)">×</button>`;
+    <button class="btn-icon" onclick="removeAuthorityInput(this)" style="align-self:center;">×</button>`;
   list.appendChild(row);
   updateAuthBadge();
   liveRenderIdleAuthorities();
@@ -743,7 +748,6 @@ async function endVoting() {
 
 // ── RECONSTRUCTION: share submission ──────────────────────────────
 function htmlReconstruction(state) {
-  const sharesPct = Math.min(100, Math.round((state.submitted_shares.length / state.shamir_t) * 100));
   const weightPct = Math.min(100, Math.round((state.coalition_weight / state.threshold) * 100));
 
   const cheaters = state.cheaters || [];
@@ -786,20 +790,14 @@ function htmlReconstruction(state) {
 
       <div class="threshold-meters" style="margin-top:14px;">
         <div class="meter-box">
-          <div class="meter-label">Shares (min ${state.shamir_t})</div>
-          <div class="meter-track"><div class="meter-fill shares" id="m-shares" style="width:${sharesPct}%"></div></div>
-          <div class="meter-value shares" id="v-shares">${state.submitted_shares.length} / ${state.shamir_t}</div>
-        </div>
-        <div class="meter-box">
-          <div class="meter-label">Quorum (need ≥ ${state.threshold})</div>
+          <div class="meter-label">Threshold (need ≥ ${state.threshold})</div>
           <div class="meter-track"><div class="meter-fill weight" id="m-weight" style="width:${weightPct}%"></div></div>
           <div class="meter-value weight" id="v-weight">${state.coalition_weight} / ${state.threshold}</div>
         </div>
       </div>
 
       <p class="notice">
-        Reconstruction requires <strong>at least ${state.shamir_t} shares</strong>
-        <em>and</em> an effective quorum of ≥&nbsp;<strong>${state.threshold}</strong>
+        Reconstruction requires an effective threshold of ≥&nbsp;<strong>${state.threshold}</strong>
         combined reputation weight. High-reputation authorities count for more.
       </p>
 
@@ -809,16 +807,11 @@ function htmlReconstruction(state) {
 }
 
 function updateReconstructData(state) {
-  const sharesPct = Math.min(100, Math.round((state.submitted_shares.length / state.shamir_t) * 100));
   const weightPct = Math.min(100, Math.round((state.coalition_weight / state.threshold) * 100));
 
-  const ms = document.getElementById('m-shares');
   const mw = document.getElementById('m-weight');
-  const vs = document.getElementById('v-shares');
   const vw = document.getElementById('v-weight');
-  if (ms) ms.style.width = sharesPct + '%';
   if (mw) mw.style.width = weightPct + '%';
-  if (vs) vs.textContent = `${state.submitted_shares.length} / ${state.shamir_t}`;
   if (vw) vw.textContent = `${state.coalition_weight} / ${state.threshold}`;
 
   // Update submitted rows
@@ -1090,7 +1083,7 @@ function htmlComplete(state) {
     </div>
     <div class="card-body">
       <div class="info-row"><span class="label">Coalition</span><span class="val">${state.submitted_shares.join(', ')}</span></div>
-      <div class="info-row"><span class="label">Coalition quorum</span><span class="val" style="color:var(--purple)">${state.coalition_weight} / ${state.threshold}</span></div>
+      <div class="info-row"><span class="label">Coalition weight</span><span class="val" style="color:var(--purple)">${state.coalition_weight} / ${state.threshold}</span></div>
       <div style="margin-top:16px;">${bars}</div>
 
       <p class="rep-section-title">Authority Reputation Update</p>
@@ -1187,7 +1180,7 @@ function liveRenderIdleAuthorities() {
 
   const quorum = computeQuorum(reps);
   const maxRep = Math.max(...reps, 0.001);
-  document.getElementById('next-threshold-label').textContent = `Effective quorum: ${quorum}`;
+  document.getElementById('next-threshold-label').textContent = `Effective threshold: ${quorum}`;
   document.getElementById('auth-list').innerHTML = auths.map(a => `
     <div class="auth-row">
       <div class="auth-avatar-sm">${a.name[0].toUpperCase()}</div>
@@ -1204,7 +1197,7 @@ function liveRenderIdleAuthorities() {
 // ── Right panel: authorities (active/reconstruction/complete) ─────
 function renderAuthorities(auths, threshold) {
   const maxRep = Math.max(...auths.map(a => a.reputation), 0.001);
-  document.getElementById('next-threshold-label').textContent = `Effective quorum: ${threshold}`;
+  document.getElementById('next-threshold-label').textContent = `Effective threshold: ${threshold}`;
   document.getElementById('auth-list').innerHTML = auths.map(a => `
     <div class="auth-row">
       <div class="auth-avatar-sm">${a.name[0]}</div>

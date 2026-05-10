@@ -136,7 +136,7 @@ Each decryption authority accumulates a persistent reputation score
 derived from verifiable on-chain behaviour across elections, covering
 participation, contribution, and honesty.
 Reputation scores are converted into per-authority weights, and the
-effective quorum adapts via a two-piece linear formula anchored at
+effective threshold adapts via a two-piece linear formula anchored at
 $\lceil N/2 \rceil$ for neutral trust.
 A \emph{two-gate reconstruction policy} simultaneously enforces a
 cryptographic share-count gate and a reputation weight gate, closing
@@ -176,10 +176,10 @@ accountability, or graceful failure recovery simultaneously.
 \midrule
 $N$               & Number of decryption authorities \\
 $t$               & Shamir threshold (minimum shares for reconstruction) \\
-$\tau$            & Effective quorum (reputation-weighted threshold) \\
-$\tau_{\text{neutral}}$ & Neutral quorum $= \lceil N/2 \rceil$ \\
-$\tau_{\text{min}}$     & Minimum quorum $= \max(2, \lceil N/3 \rceil)$ \\
-$\tau_{\text{max}}$     & Maximum quorum $= N - 1$ \\
+$\tau$            & Effective threshold (reputation-weighted) \\
+$\tau_{\text{neutral}}$ & Neutral threshold $= \lceil N/2 \rceil$ \\
+$\tau_{\text{min}}$     & Minimum threshold $= \max(2, \lceil N/3 \rceil)$ \\
+$\tau_{\text{max}}$     & Maximum threshold $= N - 1$ \\
 $R_i$             & Reputation score of authority $A_i$ \\
 $\bar{R}$         & Mean reputation across all authorities \\
 $w_i$             & Reputation weight of authority $A_i$ \\
@@ -256,7 +256,7 @@ This thesis makes the following contributions:
     three objectively measurable behavioural dimensions.
 
   \item \textbf{Two-piece linear adaptive threshold.} A provably anchored
-    quorum formula that maps collective trust to a reconstruction requirement
+    threshold formula that maps collective trust to a reconstruction requirement
     between $\lceil N/3 \rceil$ and $N-1$, initialising at exactly
     $\lceil N/2 \rceil$ for fresh authorities.
 
@@ -266,7 +266,7 @@ This thesis makes the following contributions:
 
   \item \textbf{Concentration-resistance proof.} Formal demonstration that
     no single authority can ever accumulate sufficient weight to satisfy
-    the quorum alone, regardless of their reputation.
+    the threshold alone, regardless of their reputation.
 
   \item \textbf{End-to-end prototype.} A fully operational implementation
     comprising ElGamal encryption, Shamir sharing, PVSS verification,
@@ -360,7 +360,7 @@ cryptosystems, enabling distributed decryption without reconstructing the
 private key in full — a precursor to the threshold ElGamal decryption used
 in S$^3$-Vote.
 S$^3$-Vote further augments this with reputation weights, so that the
-effective contribution of each authority to the reconstruction quorum depends
+effective contribution of each authority to the reconstruction threshold depends
 on their trust level.
 
 \subsection{Publicly Verifiable Secret Sharing}
@@ -555,7 +555,7 @@ by default; encrypting ballots on-chain requires additional zero-knowledge
 infrastructure that significantly increases complexity and gas cost.
 Second, \emph{fixed and public authority set}: Ethereum-based schemes
 have no native mechanism for reputation-weighted decryption authorities
-whose quorum adapts across rounds.
+whose threshold adapts across rounds.
 Third, \emph{throughput and cost}: recording every ballot as a
 blockchain transaction is prohibitively expensive and slow for elections
 with thousands of voters.
@@ -782,7 +782,7 @@ authority $A_i$ based on outcomes recorded on the blockchain:
   \end{cases}
 \end{equation}
 where $\bar{w}_{\text{needed}} = \tau / t$ is the average weight one share
-must carry to satisfy the quorum, $\tau$ is the current quorum, and $t$ is
+must carry to satisfy the threshold, $\tau$ is the current threshold, and $t$ is
 the Shamir threshold.
 High-weight authorities naturally score higher here, reflecting that their
 participation was disproportionately valuable.
@@ -837,7 +837,7 @@ New authorities begin at:
   R_{\text{initial}} = \frac{2}{3}
 \end{equation}
 This value is deliberately chosen so that a fully fresh, equal-reputation
-group produces a neutral starting quorum of exactly $\lceil N/2 \rceil$
+group produces a neutral starting threshold of exactly $\lceil N/2 \rceil$
 (proven formally in Theorem~\ref{thm:anchor}).
 
 \subsection{Reputation Weights}
@@ -932,7 +932,7 @@ When an authority participates in a new election, their historical score
 is loaded automatically. New authorities who have no prior history start
 at $R_{\text{initial}} = 2/3$.
 This design gives the system \emph{institutional memory}: a long track
-record of honest behaviour genuinely lowers future quorum requirements,
+record of honest behaviour genuinely lowers future threshold requirements,
 while sustained misbehaviour permanently raises them.
 
 % =============================================================================
@@ -945,7 +945,7 @@ while sustained misbehaviour permanently raises them.
 Collective trust is not simply the average reputation — it must also account
 for \emph{how evenly} reputation is distributed.
 An authority with extremely high reputation relative to peers can accumulate
-a disproportionate weight, potentially satisfying the quorum alone if the
+a disproportionate weight, potentially satisfying the threshold alone if the
 threshold were low.
 We prevent this via the evenness factor:
 
@@ -967,9 +967,9 @@ The combined trust score is:
 \begin{property}[Concentration resistance]
 \label{prop:concentration}
   If one authority's weight approaches $N$, evenness $E \to 0$,
-  trust $\tau_{\text{trust}} \to 0$, and the quorum rises to
+  trust $\tau_{\text{trust}} \to 0$, and the threshold rises to
   $\tau_{\text{max}} = N-1$.
-  No single authority can ever satisfy the quorum alone.
+  No single authority can ever satisfy the threshold alone.
 \end{property}
 
 \subsection{Two-Piece Linear Adaptive Formula}
@@ -978,11 +978,11 @@ The combined trust score is:
   For a group of $N$ authorities:
   \begin{align}
     \tau_{\text{neutral}} &= \left\lceil \tfrac{N}{2} \right\rceil
-      & &\text{(starting quorum for fresh authorities)} \\
+      & &\text{(starting threshold for fresh authorities)} \\
     \tau_{\text{max}}     &= N - 1
-      & &\text{(worst-case quorum, no trust)} \\
+      & &\text{(worst-case threshold, no trust)} \\
     \tau_{\text{min}}     &= \max\!\left(2,\, \left\lceil \tfrac{N}{3} \right\rceil\right)
-      & &\text{(best-case quorum, full trust)}
+      & &\text{(best-case threshold, full trust)}
   \end{align}
 \end{definition}
 
@@ -1028,7 +1028,7 @@ The combined trust score is:
 \begin{axis}[
   width=13cm, height=7cm,
   xlabel={Trust score $\tau_{\text{trust}}$},
-  ylabel={Effective quorum $\tau$},
+  ylabel={Effective threshold $\tau$},
   xmin=0, xmax=1,
   ymin=1.5, ymax=7,
   xtick={0, 0.333, 0.667, 1},
@@ -1056,19 +1056,19 @@ The combined trust score is:
 \addplot[gray, dashed, thin] coordinates { (0.667, 1.5) (0.667, 7) };
 \node[gray, font=\footnotesize] at (axis cs: 0.71, 6.5) {Initial trust};
 
-\addlegendentry{$N=6$: quorum $\in [2,5]$}
-\addlegendentry{$N=7$: quorum $\in [3,6]$}
-\addlegendentry{$N=5$: quorum $\in [2,4]$}
+\addlegendentry{$N=6$: threshold $\in [2,5]$}
+\addlegendentry{$N=7$: threshold $\in [3,6]$}
+\addlegendentry{$N=5$: threshold $\in [2,4]$}
 \end{axis}
 \end{tikzpicture}
-\caption{Adaptive quorum as a function of collective trust for three group
+\caption{Adaptive threshold as a function of collective trust for three group
   sizes. All curves pass through $\tau_{\text{neutral}} = \lceil N/2 \rceil$
   at the initial trust value of $\tfrac{2}{3}$ (vertical dashed line),
   confirming Theorem~\ref{thm:anchor}.}
 \label{fig:threshold}
 \end{figure}
 
-\subsection{Quorum Range by Group Size}
+\subsection{Threshold Range by Group Size}
 
 \begin{center}
 \begin{tabular}{cccccc}
@@ -1096,7 +1096,7 @@ $N$ & $\tau_{\text{neutral}}$ & $\tau_{\text{min}}$
 
 Let $\mathcal{S}$ denote the set of authorities who have submitted
 valid shares, $t$ the Shamir threshold derived as
-$t = \max(2, \lfloor\tau\rfloor)$, and $\tau$ the current adaptive quorum.
+$t = \max(2, \lfloor\tau\rfloor)$, and $\tau$ the current adaptive threshold.
 Reconstruction is triggered if and only if both gates are simultaneously
 satisfied:
 
@@ -1122,7 +1122,7 @@ satisfied:
   arrow/.style={-{Stealth[length=7pt]}, thick}
 ]
   \node[gate]   (g1) at (0,0)    {Gate 1\\$|\mathcal{S}| \geq t$\\share count};
-  \node[gate]   (g2) at (5,0)    {Gate 2\\$\sum w_i \geq \tau$\\weight quorum};
+  \node[gate]   (g2) at (5,0)    {Gate 2\\$\sum w_i \geq \tau$\\weight threshold};
   \node[result] (ok) at (2.5,-2) {Reconstruct\\private key};
   \node[fail]   (f1) at (-1,-2)  {Wait / fail\\(need more shares)};
   \node[fail]   (f2) at (6,-2)   {Wait / fail\\(need more weight)};
@@ -1239,7 +1239,7 @@ records the failure on the blockchain before any remaining authorities act.
 \toprule
 \textbf{Event type} & \textbf{Payload (key fields)} \\
 \midrule
-\texttt{election\_start}          & Title, options, authority list, adaptive quorum, PVSS commitments $\{C_i\}$ \\
+\texttt{election\_start}          & Title, options, authority list, adaptive threshold, PVSS commitments $\{C_i\}$ \\
 \texttt{vote\_cast}               & Round, ElGamal ciphertext $(C_1, C_2)$ \\
 \texttt{voting\_closed}           & Round, total vote count \\
 \texttt{share\_submitted}         & Round, authority name, coalition weight at submission \\
@@ -1247,7 +1247,7 @@ records the failure on the blockchain before any remaining authorities act.
 \texttt{share\_skipped}           & Round, authority name \\
 \texttt{reconstruction\_complete} & Round, coalition members, coalition weight, tally \\
 \texttt{election\_failed}         & Round, valid shares, cheaters, skippers, failure reason \\
-\texttt{reputation\_update}       & Round, updated scores for all authorities, new quorum \\
+\texttt{reputation\_update}       & Round, updated scores for all authorities, new threshold \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1320,7 +1320,7 @@ retracted. This provides:
 
 \subsection{Sybil Resistance}
 
-Creating new authority identities does not lower the quorum.
+Creating new authority identities does not lower the threshold.
 New authorities start at $R_{\text{initial}} = 2/3$ (neutral).
 Adding more neutral-reputation authorities increases $N$, which increases
 $\tau_{\text{neutral}} = \lceil N/2 \rceil$ proportionally.
@@ -1611,7 +1611,7 @@ where $c_h$ is the small cost of honest participation and
 $\boldsymbol{\sigma}_{-i}$ denotes all other authorities' strategies.
 
 Crucially, payoffs are not one-shot: reputation persists across rounds.
-Higher reputation produces lower future quorums, making reconstruction
+Higher reputation produces lower future thresholds, making reconstruction
 easier and $B/|\mathcal{S}|$ achievable with fewer abortive rounds.
 
 \subsection{Cheating is a Dominated Strategy}
@@ -1647,7 +1647,7 @@ easier and $B/|\mathcal{S}|$ achievable with fewer abortive rounds.
 
   \textbf{(3) Compounding future cost.}
   The lower reputation reduces $w_i$ in all subsequent rounds.
-  Since the quorum $\tau$ depends on collective trust
+  Since the threshold $\tau$ depends on collective trust
   (Equation~\eqref{eq:threshold}), the cheater's degraded weight makes
   future reconstructions harder for the whole group — including themselves —
   reducing the probability of earning $B/|\mathcal{S}|$ in future rounds.
@@ -1684,10 +1684,10 @@ unravel at the first opportunity.
 \subsection{Sybil Rationality Analysis}
 
 An adversary flooding the authority set with $k$ fake identities does
-not lower the quorum.
+not lower the threshold.
 Each fake identity starts at $R_{\text{initial}} = 2/3$ with weight 1.0,
 so $k$ fake authorities add weight $k$ to the group.
-However, the neutral quorum increases from $\lceil N/2 \rceil$ to
+However, the neutral threshold increases from $\lceil N/2 \rceil$ to
 $\lceil (N+k)/2 \rceil$, rising by $\lceil k/2 \rceil$.
 The net weight surplus gained by the Sybil adversary is only
 $k - \lceil k/2 \rceil = \lfloor k/2 \rfloor$,
@@ -1826,7 +1826,7 @@ providing a passive incentive for authorities to remain active.
     $\log(0.01)/\log(0.95) \approx 90$ rounds.
   \item $\delta < 0.85$: rapid erosion; honest authorities' reputations
     also degrade noticeably, destabilising the long-run equilibrium and
-    potentially raising the quorum even for honest groups.
+    potentially raising the threshold even for honest groups.
 \end{itemize}
 
 The default $\delta = 0.95$ removes ghost authorities on a scale of
@@ -1850,14 +1850,14 @@ $\gamma$ & 0.5 & Harsher for cheats (H=0); but H=0.5 skips also penalised
 $\lambda$ & 0.7 & Stable reputation; slower build and recovery
                & Reactive; volatile; fast convergence \\
 $\delta$ & 0.95 & Ghost authorities persist longer
-               & Honest reputations erode; quorum rises \\
+               & Honest reputations erode; threshold rises \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 The system is \emph{qualitatively robust}: across a wide range of
 parameter choices, honest authorities earn higher reputation than
-cheaters, and the quorum trends downward for honest groups.
+cheaters, and the threshold trends downward for honest groups.
 The sensitivity analysis confirms the design rationale — $\gamma$ large
 for deterrence, $\alpha$ small to discourage empty participation,
 $\lambda$ moderate for memory-reactivity balance, $\delta$ near-1 for
@@ -1904,7 +1904,7 @@ Reputation source & Social / peer evaluation & On-chain, deterministic \\
 Cheat detection & Implicit (failure only) & PVSS — public proof \\
 Reconstruction gate & Single (weighted) & Dual (shares AND weight) \\
 Concentration protection & None & Evenness factor \\
-Neutral quorum anchor & Ad hoc & $\lceil N/2 \rceil$ (proven) \\
+Neutral threshold anchor & Ad hoc & $\lceil N/2 \rceil$ (proven) \\
 Failed election recovery & Not addressed & Automatic \\
 Audit trail & Database & Blockchain \\
 Complete voting system & No & Yes \\
@@ -1930,7 +1930,7 @@ high-weight authority meets the weight alone).
 Equation~\eqref{eq:twogates} closes both simultaneously.
 
 \paragraph{Provable neutral anchor.}
-Theorem~\ref{thm:anchor} proves that the quorum initialises at
+Theorem~\ref{thm:anchor} proves that the threshold initialises at
 $\lceil N/2 \rceil$ for any group size, providing a principled and
 consistent baseline. Nojoumian's scheme has no equivalent guarantee.
 
@@ -2019,7 +2019,7 @@ The single-page dashboard provides real-time visibility into all system
 state. Key features include:
 \begin{itemize}
   \item Authority list with reputation history loaded from the persistent
-    registry; live quorum preview updating as authorities are added or removed.
+    registry; live threshold preview updating as authorities are added or removed.
   \item Voting phase with encrypted-ballot progress tracker showing
     individual voter chips as ballots are cast.
   \item Reconstruction phase with live share-count and coalition-weight
@@ -2078,10 +2078,10 @@ Updated reputations: 5 honest at 0.728, cheater at 0.472, skipper at 0.515.
   \tau &= 6 - (6-4)(0.652)(1.5) \approx 4.04
 \end{align*}
 
-The quorum for Round 2 is \textbf{4.04} — marginally above the neutral 4,
+The threshold for Round 2 is \textbf{4.04} — marginally above the neutral 4,
 reflecting that the group's cohesion dropped slightly due to the cheater
 and skipper. Sustained honest behaviour across subsequent rounds drives the
-quorum down toward 3 (the floor $\tau_{\text{min}}$ for $N=7$).
+threshold down toward 3 (the floor $\tau_{\text{min}}$ for $N=7$).
 
 \begin{figure}[H]
 \centering
@@ -2089,7 +2089,7 @@ quorum down toward 3 (the floor $\tau_{\text{min}}$ for $N=7$).
 \begin{axis}[
   width=13cm, height=5.5cm,
   xlabel={Election round},
-  ylabel={Effective quorum $\tau$},
+  ylabel={Effective threshold $\tau$},
   xmin=0, xmax=8,
   ymin=2.5, ymax=5,
   xtick={0,1,...,8},
@@ -2114,11 +2114,11 @@ quorum down toward 3 (the floor $\tau_{\text{min}}$ for $N=7$).
 \addlegendentry{1 cheat + 1 skip in round 1, then honest}
 \end{axis}
 \end{tikzpicture}
-\caption{Quorum evolution for $N=7$ over 8 rounds. When all authorities
-  behave honestly, the quorum steadily decreases toward the floor of 3.
+\caption{Threshold evolution for $N=7$ over 8 rounds. When all authorities
+  behave honestly, the threshold steadily decreases toward the floor of 3.
   One round of cheating/skipping deflects the trajectory upward, requiring
   several honest rounds to recover.}
-\label{fig:quorumevol}
+\label{fig:thresholdevol}
 \end{figure}
 
 % =============================================================================
@@ -2166,9 +2166,9 @@ The core insight is that the reconstruction threshold should be a
 \emph{function of demonstrated trustworthiness}, not a fixed design
 parameter. By measuring trustworthiness objectively through
 PVSS-verified behavioural events, converting it to weights, and
-mapping it to a quorum through a provably anchored formula, the system
+mapping it to a threshold through a provably anchored formula, the system
 creates a dynamic equilibrium: honest groups earn efficiency (lower
-quorum); dishonest or heterogeneous groups face proportionally higher
+threshold); dishonest or heterogeneous groups face proportionally higher
 requirements.
 
 The two-gate reconstruction policy ensures that neither numerical

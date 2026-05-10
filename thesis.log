@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  10 MAY 2026 12:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  10 MAY 2026 15:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1312,11 +1312,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 1905--1906
 []|\T1/cmr/m/n/12 Dual (shares AND
  []
 
-
-Underfull \hbox (badness 2435) in paragraph at lines 1907--1907
-[]|\T1/cmr/m/n/12 Neutral quo-rum an-
- []
-
 [34] (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
 )
@@ -1328,14 +1323,24 @@ nput line 1973.
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
-Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: A5D92EC565D4436AFDA803FBCBD53D71;12469.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `thesis.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `thesis.out':
+(rerunfilecheck)             Before: A5D92EC565D4436AFDA803FBCBD53D71;12469
+(rerunfilecheck)             After:  9807B7EEF63F3879A3B0D40877264AB2;12484.
  ) 
 Here is how much of TeX's memory you used:
- 43750 strings out of 467525
- 1009604 string characters out of 5418982
- 1849710 words of memory out of 5000000
- 71685 multiletter control sequences out of 15000+600000
+ 43751 strings out of 467525
+ 1009623 string characters out of 5418982
+ 1850708 words of memory out of 5000000
+ 71686 multiletter control sequences out of 15000+600000
  666281 words of font info for 144 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,19n,94p,728b,2280s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1378,7 +1383,7 @@ pe1/public/cm-super/sfti1200.pfb></usr/local/texlive/2026/texmf-dist/fonts/type
 public/cm-super/sftt1000.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/pu
 blic/cm-super/sftt1095.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/publ
 ic/cm-super/sftt1200.pfb>
-Output written on thesis.pdf (42 pages, 1022210 bytes).
+Output written on thesis.pdf (42 pages, 1021601 bytes).
 PDF statistics:
  1082 PDF objects out of 1200 (max. 8388607)
  929 compressed objects within 10 object streams
