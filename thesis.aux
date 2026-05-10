@@ -1,0 +1,186 @@
+\relax 
+\providecommand\zref@newlabel[2]{}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{List of Symbols}{6}{section*.3}\protected@file@percent }
+\citation{shamir1979}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{7}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{7}{Introduction}{section.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation}{7}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Problem Statement}{7}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Contributions}{7}{subsection.1.3}\protected@file@percent }
+\citation{elgamal1985}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Thesis Structure}{8}{subsection.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background and Related Work}{8}{section.2}\protected@file@percent }
+\newlabel{sec:background}{{2}{8}{Background and Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}ElGamal Encryption}{8}{subsection.2.1}\protected@file@percent }
+\citation{elgamal1985,boneh1998}
+\citation{shamir1979}
+\citation{desmedt1990}
+\citation{schoenmakers1999,pedersen1991}
+\newlabel{eq:eg1}{{1}{9}{ElGamal Encryption}{equation.1}{}}
+\newlabel{eq:eg2}{{2}{9}{ElGamal Encryption}{equation.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Shamir Secret Sharing}{9}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Publicly Verifiable Secret Sharing}{9}{subsection.2.3}\protected@file@percent }
+\citation{nojoumian2012,nojoumian2018}
+\newlabel{eq:commitment}{{5}{10}{PVSS Commitment}{equation.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces PVSS share creation and verification flow. Commitments are anchored on-chain before any share is submitted, preventing retroactive manipulation.}}{10}{figure.caption.4}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:pvss}{{1}{10}{PVSS share creation and verification flow. Commitments are anchored on-chain before any share is submitted, preventing retroactive manipulation}{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Blockchain Technology}{10}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Prior Work on Reputation in Secret Sharing}{10}{subsection.2.5}\protected@file@percent }
+\citation{cramer1997}
+\citation{foo1992}
+\citation{adida2008}
+\citation{cortier2013}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Electronic Voting Systems: State of the Art}{11}{subsection.2.6}\protected@file@percent }
+\newlabel{sec:evoting}{{2.6}{11}{Electronic Voting Systems: State of the Art}{subsection.2.6}{}}
+\citation{clarkson2008}
+\@writefile{toc}{\contentsline {section}{\numberline {3}System Architecture}{13}{section.3}\protected@file@percent }
+\newlabel{sec:architecture}{{3}{13}{System Architecture}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Design Goals}{13}{subsection.3.1}\protected@file@percent }
+\citation{lamport1982}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Threat Model}{14}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Adversary classification.}{14}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Formal assumptions.}{14}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Out of scope.}{15}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}System Participants and High-Level Architecture}{15}{subsection.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces High-level S$^3$-Vote architecture. All cryptographic operations write immutable records to the blockchain. The reputation engine updates authority scores after each round and feeds them into the next election's threshold computation.}}{15}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:architecture}{{2}{15}{High-level S$^3$-Vote architecture. All cryptographic operations write immutable records to the blockchain. The reputation engine updates authority scores after each round and feeds them into the next election's threshold computation}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Election Lifecycle}{16}{subsection.3.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces S$^3$-Vote election lifecycle. Five normal phases form a clock\-wise cycle (blue); impossible reconstruction transitions to a failed state, applies penalties, and re-enters the reputation update phase (red).}}{16}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:lifecycle}{{3}{16}{S$^3$-Vote election lifecycle. Five normal phases form a clock\-wise cycle (blue); impossible reconstruction transitions to a failed state, applies penalties, and re-enters the reputation update phase (red)}{figure.caption.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Reputation Model}{16}{section.4}\protected@file@percent }
+\newlabel{sec:reputation}{{4}{16}{Reputation Model}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Behavioural Scoring}{16}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Reputation Update Formula}{17}{subsection.4.2}\protected@file@percent }
+\newlabel{eq:rep}{{10}{17}{Reputation Update Formula}{equation.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Initial Reputation}{17}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Reputation Weights}{17}{subsection.4.4}\protected@file@percent }
+\newlabel{eq:weight}{{12}{17}{Reputation Weights}{equation.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Reputation Evolution}{18}{subsection.4.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Reputation trajectories for three authority behavioural profiles across 10 election rounds. Honest authorities converge toward high reputation; a single cheating event causes a severe drop that requires many honest rounds to recover from; skipping causes a moderate penalty.}}{18}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:reptraj}{{4}{18}{Reputation trajectories for three authority behavioural profiles across 10 election rounds. Honest authorities converge toward high reputation; a single cheating event causes a severe drop that requires many honest rounds to recover from; skipping causes a moderate penalty}{figure.caption.19}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Persistence Across Elections}{18}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Adaptive Threshold}{18}{section.5}\protected@file@percent }
+\newlabel{sec:threshold}{{5}{18}{Adaptive Threshold}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Trust Evenness}{18}{subsection.5.1}\protected@file@percent }
+\newlabel{eq:evenness}{{13}{19}{Trust Evenness}{equation.13}{}}
+\newlabel{eq:trust}{{14}{19}{Trust Evenness}{equation.14}{}}
+\newlabel{prop:concentration}{{5.1}{19}{Concentration resistance}{property.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Two-Piece Linear Adaptive Formula}{19}{subsection.5.2}\protected@file@percent }
+\newlabel{eq:threshold}{{18}{19}{Two-Piece Linear Adaptive Formula}{equation.18}{}}
+\newlabel{thm:anchor}{{5.1}{19}{Neutral Anchor}{theorem.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Adaptive quorum as a function of collective trust for three group sizes. All curves pass through $\tau _{\text  {neutral}} = \lceil N/2 \rceil $ at the initial trust value of $\tfrac  {2}{3}$ (vertical dashed line), confirming Theorem~\ref {thm:anchor}.}}{20}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:threshold}{{5}{20}{Adaptive quorum as a function of collective trust for three group sizes. All curves pass through $\tau _{\text {neutral}} = \lceil N/2 \rceil $ at the initial trust value of $\tfrac {2}{3}$ (vertical dashed line), confirming Theorem~\ref {thm:anchor}}{figure.caption.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Quorum Range by Group Size}{20}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Two-Gate Reconstruction Policy}{20}{section.6}\protected@file@percent }
+\newlabel{sec:twogates}{{6}{20}{Two-Gate Reconstruction Policy}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Formal Definition}{20}{subsection.6.1}\protected@file@percent }
+\newlabel{eq:twogates}{{19}{20}{Formal Definition}{equation.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Two-gate reconstruction policy. Gate 1 enforces the cryptographic minimum share count; Gate 2 enforces the trust weight minimum. Failure of either gate blocks reconstruction and may trigger impossibility detection.}}{21}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:twogates}{{6}{21}{Two-gate reconstruction policy. Gate 1 enforces the cryptographic minimum share count; Gate 2 enforces the trust weight minimum. Failure of either gate blocks reconstruction and may trigger impossibility detection}{figure.caption.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Why Two Gates Are Necessary}{21}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Gate 1 alone — flooding attack.}{21}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Gate 2 alone — monopoly attack.}{21}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Combined protection.}{21}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Impossibility Detection}{21}{subsection.6.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Real-time impossibility check}}{21}{algorithm.1}\protected@file@percent }
+\newlabel{alg:impossible}{{1}{21}{Real-time impossibility check}{algorithm.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Blockchain Integration}{22}{section.7}\protected@file@percent }
+\newlabel{sec:blockchain}{{7}{22}{Blockchain Integration}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Block Structure}{22}{subsection.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Blockchain block structure. Each block's hash includes the previous block's hash, forming a chain. Altering any block's data changes its hash, invalidating all subsequent blocks.}}{22}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:blockchain}{{7}{22}{Blockchain block structure. Each block's hash includes the previous block's hash, forming a chain. Altering any block's data changes its hash, invalidating all subsequent blocks}{figure.caption.25}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Events Recorded on the Blockchain}{22}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Non-Repudiation Guarantee}{23}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Production Deployment Note}{23}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Security Analysis}{23}{section.8}\protected@file@percent }
+\newlabel{sec:security}{{8}{23}{Security Analysis}{section.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Vote Confidentiality}{23}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Tally Integrity}{23}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Cheat Detection and Accountability}{24}{subsection.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Sybil Resistance}{24}{subsection.8.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.5}Collusion Resistance}{24}{subsection.8.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.6}Concentration Attack}{24}{subsection.8.6}\protected@file@percent }
+\citation{boneh1998}
+\citation{katzlindell2014}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.7}Formal Ballot Privacy Proof}{25}{subsection.8.7}\protected@file@percent }
+\newlabel{thm:indcpa}{{8.1}{25}{Ballot Privacy under DDH}{theorem.8.1}{}}
+\citation{shamir1979}
+\citation{chaum1988}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.8}Receipt-Freeness and Coercion Resistance}{26}{subsection.8.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The coercion problem.}{26}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Mix-net integration.}{26}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Homomorphic tallying.}{27}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Comparison of approaches.}{27}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.9}End-to-End Verifiability}{27}{subsection.8.9}\protected@file@percent }
+\newlabel{sec:e2ev}{{8.9}{27}{End-to-End Verifiability}{subsection.8.9}{}}
+\@writefile{toc}{\contentsline {paragraph}{Individual verifiability.}{28}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Universal verifiability.}{28}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Tally integrity under hash-chain.}{28}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Game-Theoretic Incentive Analysis}{28}{section.9}\protected@file@percent }
+\newlabel{sec:gametheory}{{9}{28}{Game-Theoretic Incentive Analysis}{section.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Model}{29}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Cheating is a Dominated Strategy}{29}{subsection.9.2}\protected@file@percent }
+\newlabel{thm:dominance}{{9.1}{29}{Honesty Dominance}{theorem.9.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Coalition Instability}{30}{subsection.9.3}\protected@file@percent }
+\newlabel{prop:coalition}{{9.1}{30}{Coalition Prisoner's Dilemma}{property.9.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Sybil Rationality Analysis}{30}{subsection.9.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Parameter Sensitivity Analysis}{30}{section.10}\protected@file@percent }
+\newlabel{sec:sensitivity}{{10}{30}{Parameter Sensitivity Analysis}{section.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Effect of Memory Factor $\lambda $}{31}{subsection.10.1}\protected@file@percent }
+\newlabel{eq:equil}{{27}{31}{Effect of Memory Factor \texorpdfstring {$\lambda $}{lambda}}{equation.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Effect of memory factor $\lambda $ on long-run reputation for an always-honest authority ($\delta =0.95$ fixed). High $\lambda $ causes decay to dominate: even perfect behaviour cannot prevent slow reputation erosion. Low $\lambda $ converges fast but makes reputation volatile. The default $\lambda =0.7$ balances stability and responsiveness.}}{31}{figure.caption.33}\protected@file@percent }
+\newlabel{fig:lambda_sensitivity}{{8}{31}{Effect of memory factor $\lambda $ on long-run reputation for an always-honest authority ($\delta =0.95$ fixed). High $\lambda $ causes decay to dominate: even perfect behaviour cannot prevent slow reputation erosion. Low $\lambda $ converges fast but makes reputation volatile. The default $\lambda =0.7$ balances stability and responsiveness}{figure.caption.33}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Effect of Participation Weight $\alpha $}{31}{subsection.10.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Effect of participation weight $\alpha $ on reputation recovery after a single cheat event (round 1), followed by honest participation. Lower $\alpha $ produces a deeper initial penalty. All trajectories converge to the same long-run equilibrium ($\approx 0.84$) because the honest-participation score is $1.0$ regardless of $\alpha $.}}{32}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:alpha_sensitivity}{{9}{32}{Effect of participation weight $\alpha $ on reputation recovery after a single cheat event (round 1), followed by honest participation. Lower $\alpha $ produces a deeper initial penalty. All trajectories converge to the same long-run equilibrium ($\approx 0.84$) because the honest-participation score is $1.0$ regardless of $\alpha $}{figure.caption.34}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Effect of Decay Factor $\delta $}{32}{subsection.10.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.4}Sensitivity Summary}{33}{subsection.10.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {11}Comparison with Prior Work}{33}{section.11}\protected@file@percent }
+\newlabel{sec:comparison}{{11}{33}{Comparison with Prior Work}{section.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}Against Shamir's Threshold Scheme}{33}{subsection.11.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.2}Against Nojoumian's Social Secret Sharing}{34}{subsection.11.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Trusted dealer elimination.}{34}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Objective reputation.}{34}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Two-gate policy.}{34}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Provable neutral anchor.}{34}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Graceful failure.}{35}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {12}Prototype Implementation}{35}{section.12}\protected@file@percent }
+\newlabel{sec:implementation}{{12}{35}{Prototype Implementation}{section.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {12.1}Module Overview}{35}{subsection.12.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {12.2}Key Algorithms in Code}{35}{subsection.12.2}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Adaptive threshold computation in \texttt  {threshold.py}}}{35}{lstlisting.1}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}{\ignorespaces Two-gate reconstruction trigger in \texttt  {app.py}}}{36}{lstlisting.2}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}{\ignorespaces Impossibility detection (Algorithm~\ref {alg:impossible})}}{36}{lstlisting.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {12.3}Web Dashboard}{36}{subsection.12.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {13}Example Walkthrough}{37}{section.13}\protected@file@percent }
+\newlabel{sec:walkthrough}{{13}{37}{Example Walkthrough}{section.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {13.1}Round 1 — Initial State}{37}{subsection.13.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {13.2}Round 2 — Reputations Loaded from Registry}{37}{subsection.13.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Quorum evolution for $N=7$ over 8 rounds. When all authorities behave honestly, the quorum steadily decreases toward the floor of 3. One round of cheating/skipping deflects the trajectory upward, requiring several honest rounds to recover.}}{38}{figure.caption.41}\protected@file@percent }
+\newlabel{fig:quorumevol}{{10}{38}{Quorum evolution for $N=7$ over 8 rounds. When all authorities behave honestly, the quorum steadily decreases toward the floor of 3. One round of cheating/skipping deflects the trajectory upward, requiring several honest rounds to recover}{figure.caption.41}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {14}Limitations and Future Work}{38}{section.14}\protected@file@percent }
+\newlabel{sec:limitations}{{14}{38}{Limitations and Future Work}{section.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {15}Conclusion}{38}{section.15}\protected@file@percent }
+\newlabel{sec:conclusion}{{15}{38}{Conclusion}{section.15}{}}
+\bibstyle{plain}
+\bibcite{shamir1979}{1}
+\bibcite{elgamal1985}{2}
+\bibcite{schoenmakers1999}{3}
+\bibcite{nojoumian2012}{4}
+\bibcite{nojoumian2018}{5}
+\bibcite{pedersen1991}{6}
+\bibcite{cramer1997}{7}
+\bibcite{desmedt1990}{8}
+\bibcite{chaum1988}{9}
+\bibcite{foo1992}{10}
+\bibcite{adida2008}{11}
+\bibcite{cortier2013}{12}
+\bibcite{clarkson2008}{13}
+\bibcite{boneh1998}{14}
+\bibcite{lamport1982}{15}
+\bibcite{katzlindell2014}{16}
+\gdef \@abspage@last{42}

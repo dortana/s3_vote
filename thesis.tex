@@ -35,6 +35,8 @@
 }
 
 \geometry{margin=2.5cm, top=3cm, bottom=3cm}
+\setlength{\headheight}{15pt}
+\setlength{\emergencystretch}{3em}
 \onehalfspacing
 
 \hypersetup{
@@ -155,9 +157,9 @@ miscalibration.
 All events are recorded on a hash-chained blockchain, providing a
 tamper-evident, non-repudiable audit trail.
 The system is compared against Shamir's threshold scheme, Nojoumian's
-social secret sharing, and deployed e-voting systems including FOO92,
-Helios, Belenios, and Civitas — none of which address adaptive thresholds,
-authority accountability, or graceful failure recovery simultaneously.
+social secret sharing, and deployed e-voting systems (FOO92, Helios,
+Belenios, Civitas) — none of which address adaptive thresholds, authority
+accountability, or graceful failure recovery simultaneously.
 \end{abstract}
 
 \newpage
@@ -195,7 +197,7 @@ $x$               & ElGamal private key \\
 $y$               & ElGamal public key $= g^x \bmod p$ \\
 $k$               & Ephemeral encryption randomness \\
 $s_i$             & Shamir share of authority $A_i$ \\
-$C_i^{\text{pvss}}$ & PVSS commitment for share $s_i$ $= g^{H(s_i)} \bmod p$ \\
+$C_i$             & PVSS commitment for share $s_i$, defined as $g^{H(s_i)} \bmod p$ \\
 $\mathcal{S}$     & Set of authorities who submitted valid shares \\
 $\mathbb{G}$      & Cyclic group of prime order $q$ \\
 \bottomrule
@@ -699,6 +701,7 @@ Section~\ref{sec:security}), Byzantine behaviour at the network layer
 
 \begin{figure}[H]
 \centering
+\resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
   phase/.style={rectangle, rounded corners=8pt, draw=blue!60!black,
     fill=blue!9, minimum width=3.2cm, minimum height=1.3cm,
@@ -736,11 +739,12 @@ Section~\ref{sec:security}), Byzantine behaviour at the network layer
   % Penalise: straight up from fail to rep
   \draw[redarrow,dashed] (fail.north)
     -- node[right,note]{Penalise\\+ unlock} (rep.south);
-\end{tikzpicture}
-\caption{S$^3$-Vote election lifecycle. The five normal phases form a
-  clockwise cycle (blue); if reconstruction becomes impossible the system
-  transitions to a failed state, applies penalties, and re-enters the
-  reputation update phase (red).}
+\end{tikzpicture}%
+}
+\caption{S$^3$-Vote election lifecycle. Five normal phases form a
+  clock\-wise cycle (blue); impossible reconstruction transitions to a
+  failed state, applies penalties, and re-enters the reputation update
+  phase (red).}
 \label{fig:lifecycle}
 \end{figure}
 
@@ -1320,12 +1324,11 @@ actually \emph{raises} the required coalition size.
 \subsection{Collusion Resistance}
 
 A colluding coalition $\mathcal{C}$ of low-reputation authorities cannot
-satisfy Gate 2 unless $\sum_{i \in \mathcal{C}} w_i \geq \tau$.
-Since low-reputation authorities have $w_i < 1.0$, they must field more
-members than an equal-sized trusted coalition.
-Moreover, the evenness factor raises $\tau$ when honest authorities have
-heterogeneous reputations relative to the colluding group, making the
-required coalition size even larger.
+satisfy Gate~2 unless $\sum_{i \in \mathcal{C}} w_i \geq \tau$.
+Since low-reputation authorities have $w_i < 1$, they must field more
+members than an equally sized trusted coalition.
+Furthermore, the evenness factor raises $\tau$ when reputation is
+heterogeneous, making the required coalition size even larger.
 
 \subsection{Concentration Attack}
 
@@ -1541,8 +1544,8 @@ the exact ciphertext appears in the \texttt{vote\_cast} blocks of the
 blockchain. Since the chain is publicly readable and hash-chained, this
 requires no trust in the server.
 In a production deployment, each voter receives a cryptographic receipt
-$r = H(\text{block\_hash} \,\|\, C_1 \,\|\, C_2)$ checkable against the
-published chain at any time.
+$r = H(\text{block\_hash} \| C_1 \| C_2)$,
+verifiable against the published chain at any time.
 
 \paragraph{Universal verifiability.}
 After the election closes, anyone can independently re-derive the tally:
@@ -1695,7 +1698,7 @@ The reputation formula (Equation~\eqref{eq:rep}) contains five parameters.
 We systematically analyse how varying each parameter affects system behaviour,
 providing an empirical basis for the default values.
 
-\subsection{Effect of Memory Factor $\lambda$}
+\subsection{Effect of Memory Factor \texorpdfstring{$\lambda$}{lambda}}
 
 The memory factor $\lambda \in (0,1)$ controls the balance between
 historical reputation and current-round performance.
@@ -1757,7 +1760,7 @@ converge to $R^* \approx 0.85$, well above the neutral starting point.
 \label{fig:lambda_sensitivity}
 \end{figure}
 
-\subsection{Effect of Participation Weight $\alpha$}
+\subsection{Effect of Participation Weight \texorpdfstring{$\alpha$}{alpha}}
 
 Since cheating sets $H_i = 0$ and $C_i = 0$, the only positive
 contribution to a cheater's score comes from $\alpha \cdot P_i$
@@ -1803,7 +1806,7 @@ lower $\alpha$ means a harsher post-cheat reputation drop.
 \label{fig:alpha_sensitivity}
 \end{figure}
 
-\subsection{Effect of Decay Factor $\delta$}
+\subsection{Effect of Decay Factor \texorpdfstring{$\delta$}{delta}}
 
 The decay factor $\delta \in (0,1)$ multiplies every reputation update,
 providing a passive incentive for authorities to remain active.
@@ -1940,18 +1943,19 @@ not address.
 \subsection{Module Overview}
 
 \begin{center}
-\begin{tabular}{ll}
+\small
+\begin{tabular}{lp{8.5cm}}
 \toprule
 \textbf{Module} & \textbf{Responsibility} \\
 \midrule
-\texttt{crypto/encryption.py}         & ElGamal key generation, encryption, decryption \\
-\texttt{crypto/shamir.py}             & Polynomial split and Lagrange reconstruction \\
-\texttt{crypto/pvss.py}               & Commitment generation and share verification \\
+\texttt{crypto/encryption.py}      & ElGamal key generation, encryption, decryption \\
+\texttt{crypto/shamir.py}          & Polynomial split and Lagrange reconstruction \\
+\texttt{crypto/pvss.py}            & Commitment generation and share verification \\
 \texttt{reputation/reputation\_engine.py} & Equation~\eqref{eq:rep} implementation \\
-\texttt{reputation/threshold.py}      & Equations~\eqref{eq:evenness}--\eqref{eq:threshold} \\
-\texttt{blockchain/blockchain.py}     & SHA-256 hash-chained block list \\
-\texttt{api/app.py}                   & Flask REST API, full election lifecycle \\
-\texttt{api/templates/index.html}     & Single-page dashboard (JavaScript) \\
+\texttt{reputation/threshold.py}   & Equations~\eqref{eq:evenness}--\eqref{eq:threshold} \\
+\texttt{blockchain/blockchain.py}  & SHA-256 hash-chained block list \\
+\texttt{api/app.py}                & Flask REST API, full election lifecycle \\
+\texttt{api/templates/index.html}  & Single-page dashboard (JavaScript) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2136,9 +2140,9 @@ quorum down toward 3 (the floor $\tau_{\text{min}}$ for $N=7$).
     attribution.
 
   \item[Parameter calibration.]
-    The reputation weights $(\alpha=0.2, \beta=0.3, \gamma=0.5)$ and
-    smoothing parameters $(\lambda=0.7, \delta=0.95)$ were set by design
-    rationale. Empirical calibration over realistic election scenarios
+    The reputation weights ($\alpha{=}0.2$, $\beta{=}0.3$, $\gamma{=}0.5$)
+    and smoothing parameters ($\lambda{=}0.7$, $\delta{=}0.95$) were set by
+    design rationale. Empirical calibration over realistic election scenarios
     and adversarial benchmarks would strengthen the choices.
 
 \end{description}
